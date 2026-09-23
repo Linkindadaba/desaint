@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt #{{ sale.receipt_number }} — {{ BRAND_NAME }} Sunyani</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpeg' %}">
+
+    <!-- Fonts & Offline Bootstrap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: 'JetBrains Mono', monospace;
+            color: #0f172a;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        .receipt-container {
+            max-width: 360px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 24px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(11, 37, 69, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .receipt-table th, .receipt-table td {
+            padding: 4px 0;
+        }
+
+        .border-dashed-bottom {
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .border-dashed-top {
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .barcode {
+            font-size: 26px;
+            letter-spacing: 4px;
+            line-height: 1;
+            font-weight: 300;
+        }
+
+        /* ─── PRINT MEDIA RULES ─── */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .receipt-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 4px !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            @page {
+                margin: 4mm;
+                size: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Floating Action Bar (Hidden on Print) -->
+<div class="no-print d-flex justify-content-center gap-2 mb-3">
+    <button type="button" class="btn btn-primary font-mono shadow-sm px-4 fw-bold" onclick="window.print()">
+        <i class="fas fa-print me-1"></i> Print Receipt Slip
+    </button>
+    <a href="{% url 'orders:pos_terminal' %}" class="btn btn-outline-secondary font-mono bg-white">
+        <i class="fas fa-cash-register me-1"></i> Back to POS
+    </a>
+    <a href="{% url 'orders:pos_history' %}" class="btn btn-outline-secondary font-mono bg-white">
+        <i class="fas fa-receipt me-1"></i> Till Log
+    </a>
+</div>
+
+<!-- ═══════════════════════ RECEIPT BODY (80MM COMPLIANT) ═══════════════════════ -->
+<div class="receipt-container" id="thermalReceipt">
+    
+    <!-- Header -->
+    <div class="text-center pb-2 border-dashed-bottom mb-2">
+        <div class="p-1 bg-white rounded-3 shadow-sm d-inline-block border mb-2">
+            <img src="{% static 'img/logo.jpeg' %}" alt="Logo" style="height: 48px; width: 48px; object-fit: contain; display: block;">
+        </div>
+        <h6 class="fw-bold m-0" style="font-size: 15px; letter-spacing: 0.5px;">{{ COMPANY_NAME|upper }}</h6>
+        <div class="fw-bold text-danger" style="font-size: 13px;">{{ BRAND_NAME }}</div>
+        <div class="text-muted" style="font-size: 11px;">Sunyani Main Branch &bull; Station 01</div>
+        <div class="text-muted" style="font-size: 10.5px;">Bono Region, Ghana</div>
+        <div class="text-muted" style="font-size: 10.5px;">Tel: {{ PHONE_PRIMARY }} / {{ PHONE_SECONDARY }}</div>
+    </div>
+
+    <!-- Metadata -->
+    <div class="py-1 border-dashed-bottom mb-2" style="font-size: 11.5px;">
+        <div class="d-flex justify-content-between">
+            <span>RECEIPT: <strong>{{ sale.receipt_number }}</strong></span>
+            <span>{{ sale.created_at|date:"d/m/Y" }}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+            <span>CASHIER: <strong>{{ sale.cashier_name }}</strong></span>
+            <span>{{ sale.created_at|date:"h:i A" }}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+            <span>PAYMENT: <strong>{{ sale.get_payment_mode_display }}</strong></span>
+            <span>BRANCH: <strong>SUNYANI</strong></span>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="mb-2">
+        <table class="receipt-table">
+            <thead>
+                <tr class="border-dashed-bottom text-muted" style="font-size: 10.5px;">
+                    <th style="width: 50%;">ITEM</th>
+                    <th class="text-center" style="width: 15%;">QTY</th>
+                    <th class="text-end" style="width: 35%;">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="text-truncate" style="max-width: 170px;">
+                        <strong>{{ item.name }}</strong>
+                        <div class="text-muted" style="font-size: 10px;">@ GH₵ {{ item.price|floatformat:2 }} &bull; {{ item.unit }}</div>
+                    </td>
+                    <td class="text-center align-top">{{ item.qty }}</td>
+                    <td class="text-end align-top">GH₵ {{ item.line_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Totals & Change -->
+    <div class="border-dashed-top pt-2 mb-2" style="font-size: 12px;">
+        <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Subtotal:</span>
+            <span>GH₵ {{ sale.subtotal|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Tax (Retail Mode):</span>
+            <span class="text-success">Net Inclusive</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center py-1 border-top border-bottom border-dark my-1 fw-bold fs-6">
+            <span>TOTAL PAID:</span>
+            <span>GH₵ {{ sale.total_amount|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 small">
+            <span class="text-muted">Amount Tendered:</span>
+            <span>GH₵ {{ sale.amount_tendered|floatformat:2 }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 small fw-bold">
+            <span class="text-muted">Change Returned:</span>
+            <span class="text-success">GH₵ {{ sale.change_given|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <!-- Barcode simulation -->
+    <div class="text-center py-2 border-dashed-bottom mb-2">
+        <div class="barcode font-mono">||| | ||||| || |||||| | ||||</div>
+        <small class="text-muted" style="font-size: 9px; letter-spacing: 2px;">{{ sale.receipt_number }}</small>
+    </div>
+
+    <!-- Footer Guarantee -->
+    <div class="text-center pt-1" style="font-size: 11px;">
+        <p class="m-0 fw-bold"><em>"{{ BRAND_MOTTO }}"</em></p>
+        <p class="m-0 text-muted" style="font-size: 10px;">Write. Create. Inspire.</p>
+        <p class="m-0 mt-1">Thank you for shopping with Desaint Stationeries!</p>
+        <small class="text-muted d-block mt-2" style="font-size: 9px; line-height: 1.2;">
+            Exchange allowed within 48 hours with this original sales receipt. Stationery items must remain in clean, unwritten condition.
+        </small>
+    </div>
+
+</div>
+
+{% if auto_print %}
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        window.print();
+    }, 400);
+});
+</script>
+{% endif %}
+
+</body>
+</html>

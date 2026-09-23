@@ -1,0 +1,244 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block title %}Proforma Invoice {{ invoice.invoice_number }} — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}Official Proforma Invoice &bull; {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<style>
+@media print {
+    #sidebar, #sidebarBackdrop, .topbar-demo-bar, .app-header, .no-print {
+        display: none !important;
+    }
+    .app-main {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+    .proforma-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+}
+.proforma-sheet {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    padding: 40px;
+    color: #1e293b;
+}
+[data-bs-theme="dark"] .proforma-sheet {
+    background: #111a2e;
+    border-color: #2b384e;
+    color: #f1f5f9;
+}
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 no-print">
+    <div>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">Official Commercial Proforma Invoice</h4>
+        <small class="text-muted">Statutory Act 896 GRA Institutional Quotation & Billing Sheet</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'managerial:dashboard' %}" class="btn btn-sm btn-outline-secondary font-mono">
+            <i class="fas fa-arrow-left me-1"></i> Dashboard
+        </a>
+        <button class="btn btn-sm btn-danger font-mono" onclick="window.print()">
+            <i class="fas fa-print me-1"></i> Print Official A4 Proforma
+        </button>
+    </div>
+</div>
+
+<div class="proforma-sheet">
+    <!-- HEADER -->
+    <div class="row align-items-start pb-4 border-bottom mb-4">
+        <div class="col-7">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 70px; height: 70px; border-radius: 8px; border: 2px solid #D90429; padding: 4px; background: #ffffff; display: flex; align-items: center; justify-content: center;">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="NDS Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div>
+                    <h5 class="fw-bold m-0" style="color: var(--cv-primary); letter-spacing: 0.5px;">NAITO DE SAINT ENTERPRISE</h5>
+                    <div class="small fw-bold text-danger font-mono">TRADING AS DESAINT STATIONERIES</div>
+                    <small class="text-muted d-block font-mono" style="font-size: 0.75rem;">
+                        Adjacent STU Main Gate, Sunyani &bull; Bono Region, Ghana<br>
+                        Tel: +233 (0)24 400 1122 / (0)55 123 4567<br>
+                        GRA TIN: <span class="fw-bold text-dark font-mono">C0032918821</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-5 text-end">
+            <span class="badge bg-danger font-mono px-2 py-1 mb-2">PROFORMA INVOICE</span>
+            <div class="font-mono fw-bold fs-5 text-primary">{{ invoice.invoice_number }}</div>
+            <div class="small text-muted font-mono mt-1">Date: {{ invoice.created_at|date:"F d, Y" }}</div>
+            <div class="small text-muted font-mono">Tax Status: 
+                <span class="badge bg-secondary font-mono">
+                    {% if invoice.tax_mode == 'INSTITUTIONAL_WHT_3PCT' %}
+                        Act 896 3% WHT
+                    {% elif invoice.tax_mode == 'GRA_STANDARD_VAT' %}
+                        GRA Standard VAT
+                    {% else %}
+                        Retail Net
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENT & BILLING INFO -->
+    <div class="row g-3 mb-4 pb-3 border-bottom">
+        <div class="col-6">
+            <span class="text-uppercase font-mono small text-muted fw-bold d-block mb-1">Billed To (Institution):</span>
+            <div class="fw-bold fs-6">{{ invoice.client_name }}</div>
+            <div class="small text-muted font-mono">Contact: {{ invoice.client_phone|default:"Authorized School Rep" }}</div>
+            {% if invoice.client_tin %}
+                <div class="small text-muted font-mono">Client TIN: <span class="fw-bold">{{ invoice.client_tin }}</span></div>
+            {% endif %}
+        </div>
+        <div class="col-6 text-end">
+            <span class="text-uppercase font-mono small text-muted fw-bold d-block mb-1">Payment Terms & Mode:</span>
+            <div class="fw-bold">{{ invoice.get_payment_method_display }}</div>
+            <div class="small text-muted font-mono">Validity: 30 Days from Issue Date</div>
+            <div class="small text-muted font-mono">Payment Status: 
+                {% if invoice.is_paid %}
+                    <span class="badge bg-success font-mono">PAID IN FULL</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark font-mono">PENDING SETTLEMENT</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- LINE ITEMS TABLE -->
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered font-mono small align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 55%;">Item Description / Specification</th>
+                    <th class="text-center" style="width: 10%;">Qty</th>
+                    <th class="text-end" style="width: 15%;">Unit Price (GH₵)</th>
+                    <th class="text-end" style="width: 15%;">Total (GH₵)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td class="text-center text-muted">{{ forloop.counter }}</td>
+                        <td>
+                            <strong class="text-dark">{{ item.description }}</strong>
+                        </td>
+                        <td class="text-center fw-bold">{{ item.quantity }}</td>
+                        <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">{{ item.total_price|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="text-center text-muted">1</td>
+                        <td>
+                            <strong class="text-dark">Custom Exercise Books (80 Pages - Single Line Broad Ruling)</strong>
+                            <div class="text-muted small">250gsm Art Card with Gloss Lamination, Full-Color Crest & National Anthem</div>
+                        </td>
+                        <td class="text-center fw-bold">7,500</td>
+                        <td class="text-end">3.20</td>
+                        <td class="text-end fw-bold">24,000.00</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TOTALS & STATUTORY TAX BREAKDOWN -->
+    <div class="row g-4 mb-4">
+        <div class="col-7">
+            <div class="p-3 rounded bg-light border small font-mono">
+                <div class="fw-bold mb-1 text-primary"><i class="fas fa-landmark me-1"></i> Ghana Revenue Authority (Act 896) Compliance Note:</div>
+                <p class="m-0 text-muted" style="font-size: 0.75rem; line-height: 1.4;">
+                    Under Section 116 of the Ghana Income Tax Act, 2015 (Act 896), institutional purchasers are mandated to deduct <strong>3% Withholding Tax (WHT)</strong> on goods and supply contracts. A valid GRA Withholding Tax Certificate must be furnished to NDS upon final disbursement.
+                </p>
+            </div>
+
+            <!-- BANK SETTLEMENT PARTICULARS -->
+            <div class="mt-3 p-3 rounded bg-light border small font-mono">
+                <div class="fw-bold mb-2 text-dark"><i class="fas fa-building-columns me-1"></i> Official Banking Particulars:</div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Bank Name:</span>
+                    <strong>GCB Bank PLC</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Branch:</span>
+                    <span>Sunyani Main Branch</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Account Name:</span>
+                    <strong>NAITO DE SAINT ENTERPRISE</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Account Number:</span>
+                    <strong class="text-primary">7011130004921</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">MTN MoMo Till:</span>
+                    <strong class="text-danger">055 123 4567</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-5">
+            <table class="table table-sm table-borderless font-mono small">
+                <tbody>
+                    <tr>
+                        <td class="text-muted">Gross Subtotal:</td>
+                        <td class="text-end fw-bold">GH₵ {{ subtotal_formatted }}</td>
+                    </tr>
+                    {% if invoice.tax_mode == 'INSTITUTIONAL_WHT_3PCT' %}
+                        <tr class="text-danger">
+                            <td>Less 3% GRA WHT (Act 896):</td>
+                            <td class="text-end fw-bold">- GH₵ {{ wht_formatted }}</td>
+                        </tr>
+                    {% elif invoice.tax_mode == 'GRA_STANDARD_VAT' %}
+                        <tr class="text-primary">
+                            <td>Add Standard VAT & Levies:</td>
+                            <td class="text-end fw-bold">+ GH₵ {{ vat_formatted }}</td>
+                        </tr>
+                    {% endif %}
+                    <tr class="border-top">
+                        <td class="fw-bold fs-6 text-dark pt-2">Net Amount Payable:</td>
+                        <td class="text-end fw-bold fs-5 text-danger pt-2">GH₵ {{ total_payable_formatted }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- SIGNATURE BOX -->
+            <div class="border rounded p-3 text-center mt-3" style="background: rgba(11, 37, 69, 0.03);">
+                <div style="height: 45px; display: flex; align-items: center; justify-content: center;">
+                    <span class="text-danger fw-bold font-mono" style="font-size: 1.1rem; letter-spacing: 2px; text-decoration: underline;">
+                        NAITO DE SAINT
+                    </span>
+                </div>
+                <div class="border-top pt-1 text-muted font-mono" style="font-size: 0.7rem;">
+                    <strong>Authorized Accounts Signatory</strong><br>
+                    Naito De Saint Enterprise &bull; Sunyani Factory
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="border-top pt-3 text-center text-muted font-mono small" style="font-size: 0.7rem;">
+        This document constitutes an official quotation & proforma under the laws of the Republic of Ghana. Goods dispatched remain property of Naito De Saint Enterprise until payment is confirmed.
+    </div>
+</div>
+{% endblock %}

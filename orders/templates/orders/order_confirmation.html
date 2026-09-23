@@ -1,0 +1,133 @@
+{% extends "base_storefront.html" %}
+{% load static %}
+
+{% block title %}Order Confirmation & Proforma #{{ invoice.invoice_number }} — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}Order Confirmation &bull; {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 no-print">
+    <div>
+        <span class="badge bg-success font-mono mb-1"><i class="fas fa-check-circle me-1"></i> Order Successfully Booked</span>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">Official Order Confirmation & Proforma</h4>
+        <small class="text-muted">Invoice Ref: <span class="font-mono text-danger fw-bold">{{ invoice.invoice_number }}</span></small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'core:home' %}" class="btn btn-sm btn-outline-secondary font-mono">
+            <i class="fas fa-store me-1"></i> Storefront
+        </a>
+        <button class="btn btn-sm btn-primary font-mono" onclick="window.print()">
+            <i class="fas fa-print me-1"></i> Print / Save Invoice
+        </button>
+    </div>
+</div>
+
+<!-- INVOICE CARD (A4 PRINTABLE) -->
+<div class="cv-card p-4 p-md-5 mb-4" id="printableInvoice">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pb-4 border-bottom mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" class="rounded shadow-sm p-1 bg-white" style="height: 64px; width: 64px; object-fit: contain;">
+            <div>
+                <h4 class="fw-bold m-0" style="color: var(--cv-primary);">{{ COMPANY_NAME|upper }}</h4>
+                <div class="small fw-bold text-danger">{{ BRAND_NAME }} &bull; Sunyani Hub</div>
+                <small class="text-muted d-block">Educational Supplies &bull; Custom Books &bull; Paper Importation</small>
+                <small class="text-muted font-mono">Sunyani, Bono Region &bull; Tel: {{ PHONE_PRIMARY }}</small>
+            </div>
+        </div>
+        <div class="text-md-end font-mono">
+            <span class="badge bg-danger text-uppercase px-2 py-1 mb-1">{{ invoice.get_invoice_type_display }}</span>
+            <h5 class="fw-bold text-dark m-0">{{ invoice.invoice_number }}</h5>
+            <small class="text-muted d-block">Date: {{ invoice.created_at|date:"F d, Y" }}</small>
+            <small class="text-muted d-block">Status: {% if invoice.is_paid %}<span class="badge bg-success">PAID</span>{% else %}<span class="badge bg-warning text-dark">PAYMENT PENDING</span>{% endif %}</small>
+        </div>
+    </div>
+
+    <!-- Client & Delivery Details -->
+    <div class="row g-3 mb-4 font-mono small">
+        <div class="col-md-6">
+            <div class="p-3 bg-light rounded border">
+                <span class="text-muted text-uppercase d-block" style="font-size: 0.7rem;">Billed To / Recipient:</span>
+                <strong class="fs-6 text-dark d-block">{{ invoice.client_name }}</strong>
+                <div>Phone: {{ invoice.client_phone }}</div>
+                {% if invoice.client_tin %}<div>GRA TIN: {{ invoice.client_tin }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-3 bg-light rounded border">
+                <span class="text-muted text-uppercase d-block" style="font-size: 0.7rem;">Delivery & Payment Info:</span>
+                <div><strong>Payment Channel:</strong> {{ invoice.get_payment_method_display }}</div>
+                <div><strong>Notes / Route:</strong> {{ invoice.notes|default:"Standard Sunyani Counter Pickup" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle font-mono small">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 8%;">#</th>
+                    <th style="width: 52%;">Description</th>
+                    <th style="width: 15%;" class="text-center">Quantity</th>
+                    <th style="width: 12%;" class="text-end">Unit Price</th>
+                    <th style="width: 13%;" class="text-end">Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ item.description }}</strong></td>
+                        <td class="text-center">{{ item.quantity }}</td>
+                        <td class="text-end">GH₵ {{ item.unit_price|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">GH₵ {{ item.total_price|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">No line items attached.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                    <td class="text-end font-mono fw-bold">GH₵ {{ invoice.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% if invoice.wht_amount > 0 %}
+                <tr class="text-danger">
+                    <td colspan="4" class="text-end fw-bold">Less 3% Statutory WHT (Act 896):</td>
+                    <td class="text-end font-mono fw-bold">- GH₵ {{ invoice.wht_amount|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                <tr class="table-light">
+                    <td colspan="4" class="text-end fw-bold fs-6" style="color: var(--cv-primary);">Total Amount Payable:</td>
+                    <td class="text-end font-mono fw-bold fs-5 text-danger">GH₵ {{ invoice.total_payable|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Payment Rails -->
+    <div class="row g-3 p-3 bg-light rounded border font-mono small mb-4">
+        <div class="col-md-6">
+            <h6 class="fw-bold mb-1" style="color: var(--cv-primary);"><i class="fas fa-mobile-screen me-1 text-warning"></i> MTN MoMo Merchant Till</h6>
+            <div>Merchant Name: <strong>Desaint Stationeries</strong></div>
+            <div>Till Number: <strong>024 XXX XXXX</strong></div>
+            <div>Reference: <strong>{{ invoice.invoice_number }}</strong></div>
+        </div>
+        <div class="col-md-6 border-start-md">
+            <h6 class="fw-bold mb-1" style="color: var(--cv-primary);"><i class="fas fa-building-columns me-1 text-primary"></i> GCB Bank Direct Transfer</h6>
+            <div>Bank: <strong>GCB Bank Ghana</strong></div>
+            <div>Account Name: <strong>Naito De Saint Enterprise</strong></div>
+            <div>Branch: <strong>Sunyani Main Branch</strong></div>
+        </div>
+    </div>
+
+    <!-- Footer Seal -->
+    <div class="d-flex justify-content-between align-items-center pt-3 border-top text-muted small font-mono">
+        <div><em>"{{ BRAND_MOTTO }}"</em></div>
+        <div>Authorized by SikaDev Commercial Engine &bull; Ref: {{ invoice.invoice_number }}</div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+# Python / Django
+*.pyc
+*__pycache__*
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+dj-env/
+myvenv/
+
+# Database
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+
+# Media & Uploads
+media/uploads/*
+!media/uploads/.gitkeep
+media/crests/*
+!media/crests/.gitkeep
+media/proofs/*
+!media/proofs/.gitkeep
+
+# Environment variables
+.env
+.env.local
+
+# IDEs & System
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Static collection & Vendor source
+staticfiles/
+bootstrap-5.3.3/
+

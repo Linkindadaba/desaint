@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ BRAND_NAME }} — Educational Supplies & School Printing{% endblock %}</title>
+
+    <!-- Favicon using Client's Official Logo -->
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpeg' %}">
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Offline Bootstrap 5 CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome 6 (Strictly zero emojis throughout) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS (Gadget-Store Enterprise Layout) -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/theme.css' %}" rel="stylesheet">
+
+    <!-- Theme Toggle JS (Loaded early to prevent flash of wrong theme) -->
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Aura Gradient: Dusty Rose (Light) & Nightfall (Dark) Background Stack -->
+{% include 'includes/aura_theme_gradients.html' %}
+
+<div class="wrapper aura-content">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar">
+
+        <!-- Brand with Client's Official NDS Logo -->
+        <div class="sidebar-brand text-center py-3">
+            <a href="{% url 'managerial:dashboard' %}" class="d-inline-block text-decoration-none">
+                <div class="mb-2 p-1 bg-white rounded-3 shadow-sm d-inline-block" style="border: 2px solid rgba(255,255,255,0.25);">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" class="img-fluid rounded" style="max-height: 56px; max-width: 175px; object-fit: contain;">
+                </div>
+                <h6 class="brand-title mb-0 text-white font-mono" style="letter-spacing: 0.5px; font-size: 0.85rem;">{{ COMPANY_NAME|upper }}</h6>
+                <small class="brand-sub font-mono" style="font-size: 0.72rem; color: #cbd5e1;">{{ BRAND_NAME }} &bull; Sunyani Hub</small>
+            </a>
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="nav flex-column px-3 py-2 flex-grow-1">
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:dashboard' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'managerial:dashboard' %}active{% endif %}">
+                    <i class="fas fa-chart-pie fa-fw me-2"></i> CEO Dashboard
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'customizer:configurator' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'customizer:configurator' %}active{% endif %}">
+                    <i class="fas fa-book-open fa-fw me-2 text-warning"></i> School Customizer (5k–10k)
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'orders:pos_terminal' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'orders:pos_terminal' %}active{% endif %}">
+                    <i class="fas fa-cash-register fa-fw me-2 text-success"></i> Counter POS (Sunyani)
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'core:home' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'core:home' %}active{% endif %}">
+                    <i class="fas fa-boxes-stacked fa-fw me-2 text-info"></i> Products & Catalog
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:credit_ledger' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'managerial:credit_ledger' %}active{% endif %}">
+                    <i class="fas fa-file-invoice-dollar fa-fw me-2 text-danger"></i> School Credit Ledger
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:waybills' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'managerial:waybills' %}active{% endif %}">
+                    <i class="fas fa-truck-fast fa-fw me-2 text-primary"></i> Bus Waybill Tracker
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'customizer:proof_sample' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.view_name == 'customizer:proof_sample' %}active{% endif %}">
+                    <i class="fas fa-file-signature fa-fw me-2 text-warning"></i> Digital Proof Sign-off
+                </a>
+            </li>
+
+            <li class="nav-item mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{% url 'core:home' %}" class="nav-link sidebar-link text-warning">
+                    <i class="fas fa-store fa-fw me-2"></i> View Customer Store
+                </a>
+            </li>
+
+        </ul>
+
+        <!-- User footer -->
+        <div class="sidebar-footer px-3 py-3 border-top mt-auto">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center overflow-hidden">
+                    <div class="sidebar-avatar me-2 text-primary">
+                        <i class="fas fa-user-shield fa-2x"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="sidebar-username text-truncate fw-semibold text-white" style="font-size: 0.85rem;">Mr. Solomon</div>
+                        <small class="text-success font-mono" style="font-size: 0.72rem;"><i class="fas fa-circle-check me-1"></i>Founder & CEO</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="/admin/" class="btn btn-link text-muted p-0" title="Admin Portal">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+    <!-- END SIDEBAR -->
+
+
+    <!-- MAIN CONTENT -->
+    <div id="main-content">
+
+        <!-- Topbar -->
+        <nav class="topbar navbar px-2 px-md-4 py-2 border-bottom shadow-sm">
+            <div class="d-flex align-items-center overflow-hidden me-2">
+                <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary me-2 flex-shrink-0" aria-label="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="rounded me-2 d-none d-sm-inline-block shadow-sm" style="height: 30px; width: 30px; object-fit: contain; background: #fff; padding: 1px;">
+                <span class="topbar-title text-truncate fw-bold font-mono" style="font-size: 0.95rem;">
+                    {% block page_title %}{{ BRAND_NAME }} &bull; Enterprise Operations{% endblock %}
+                </span>
+            </div>
+
+            <!-- Demo Tour Bar Links -->
+            <div class="d-none d-xl-flex align-items-center gap-1 font-mono small">
+                <a href="{% url 'core:home' %}" class="badge text-decoration-none {% if request.resolver_match.view_name == 'core:home' %}bg-primary text-white{% else %}bg-light text-dark border{% endif %}">
+                    Store
+                </a>
+                <a href="{% url 'customizer:configurator' %}" class="badge text-decoration-none {% if 'customizer' in request.path %}bg-danger text-white{% else %}bg-light text-dark border{% endif %}">
+                    Customizer
+                </a>
+                <a href="{% url 'orders:pos_terminal' %}" class="badge text-decoration-none {% if 'pos' in request.path %}bg-success text-white{% else %}bg-light text-dark border{% endif %}">
+                    Counter POS
+                </a>
+                <a href="{% url 'managerial:dashboard' %}" class="badge text-decoration-none {% if request.resolver_match.view_name == 'managerial:dashboard' %}bg-info text-dark{% else %}bg-light text-dark border{% endif %}">
+                    Dashboard
+                </a>
+                <a href="{% url 'managerial:credit_ledger' %}" class="badge text-decoration-none {% if 'credit-ledger' in request.path %}bg-warning text-dark{% else %}bg-light text-dark border{% endif %}">
+                    Credit Ledger
+                </a>
+                <a href="{% url 'managerial:waybills' %}" class="badge text-decoration-none {% if 'waybills' in request.path %}bg-primary text-white{% else %}bg-light text-dark border{% endif %}">
+                    Waybills
+                </a>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-2 flex-shrink-0">
+                {% include 'includes/theme_toggle_button.html' %}
+                <a href="tel:{{ PHONE_PRIMARY }}" class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center font-mono" style="font-size: 0.775rem;">
+                    <i class="fas fa-phone me-1"></i> {{ PHONE_PRIMARY }}
+                </a>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div class="px-3 px-md-4 pt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-2" role="alert">
+                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page content -->
+        <div class="content-body p-3 p-md-4 flex-grow-1">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="content-footer border-top py-3 mt-auto">
+            <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 text-muted small">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="rounded bg-white p-1 shadow-sm" style="height: 26px; width: 26px; object-fit: contain;">
+                    <span>&copy; {% now "Y" %} <strong>{{ COMPANY_NAME }}</strong> ({{ BRAND_NAME }}) &bull; {{ BRAND_MOTTO }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 font-mono" style="font-size: 0.75rem;">
+                    <span class="badge bg-light text-secondary border">Bono Hub &bull; Sunyani</span>
+                    <span>SikaDev Software</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- END MAIN CONTENT -->
+
+</div>
+
+{% block modals %}{% endblock %}
+
+<!-- Offline Bootstrap 5 JS -->
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- Responsive Sidebar Toggle JS -->
+<script>
+    (function () {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        function toggleSidebar() {
+            if (window.innerWidth < 992) {
+                sidebar.classList.toggle('show');
+                backdrop.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('show');
+            backdrop.classList.remove('show');
+        }
+
+        toggleBtn?.addEventListener('click', toggleSidebar);
+        backdrop?.addEventListener('click', closeMobileSidebar);
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 992) {
+                closeMobileSidebar();
+            }
+        });
+    })();
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

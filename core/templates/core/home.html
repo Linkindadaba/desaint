@@ -1,0 +1,244 @@
+{% extends "base_storefront.html" %}
+{% load static %}
+
+{% block title %}{{ BRAND_NAME }} — Educational Supplies, Custom School Books & Direct Paper Importation{% endblock %}
+
+{% block content %}
+<!-- ═══════════════════════ DISTINCTIVE STOREFRONT HERO ═══════════════════════ -->
+<div class="store-hero mb-4" style="background: linear-gradient(135deg, #0B2545 0%, #153e70 55%, #060913 100%); border-radius: var(--radius-md); padding: 3rem 2rem; color: #ffffff; position: relative; overflow: hidden;">
+    <!-- Subtle background accent emblem -->
+    <div style="position: absolute; right: -40px; bottom: -40px; opacity: 0.05; pointer-events: none;">
+        <i class="fas fa-book-open" style="font-size: 320px;"></i>
+    </div>
+
+    <div class="row align-items-center g-4 position-relative">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                <span class="badge bg-danger px-3 py-1 rounded-pill fw-bold font-mono">
+                    <i class="fas fa-award me-1"></i> Sunyani Educational Print Works
+                </span>
+                <span class="badge bg-white bg-opacity-15 text-white font-mono px-3 py-1 rounded-pill">
+                    "Write. Create. Inspire."
+                </span>
+            </div>
+
+            <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.5px; line-height: 1.2;">
+                Direct Factory School Printing & Wholesale Stationery
+            </h1>
+
+            <p class="fs-6 text-warning font-mono mb-3">
+                Naito De Saint Enterprise &bull; "Quality You See and Trust"
+            </p>
+
+            <p class="text-light opacity-90 mb-4" style="max-width: 640px; font-size: 0.95rem; line-height: 1.7;">
+                Specializing in institutional custom exercise book print runs (<span class="font-mono fw-bold text-warning">5,000–10,000 copies MOQ</span>), Note 1/3 hardcover books, exam sheets, and imported office paper. Fast dispatch across Bono, Ahafo, Ashanti, and Northern Ghana.
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 font-mono">
+                <a href="{% url 'customizer:configurator' %}" class="btn btn-warning text-dark fw-bold px-4 py-2">
+                    <i class="fas fa-book-open me-2"></i> Configure Custom Books (5k–10k)
+                </a>
+                <a href="{% url 'core:citations' %}" class="btn btn-outline-light px-4 py-2">
+                    <i class="fas fa-certificate me-2 text-warning"></i> Corporate Citations
+                </a>
+                <a href="tel:{{ PHONE_PRIMARY }}" class="btn btn-outline-light px-3 py-2 d-none d-md-inline-flex">
+                    <i class="fas fa-phone me-1"></i> Call Us
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4 d-none d-lg-block text-center">
+            <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 shadow-sm">
+                <div class="p-2 bg-white rounded-3 shadow d-inline-block mb-3" style="line-height: 1;">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" style="height: 70px; width: 70px; object-fit: contain; display: block;">
+                </div>
+                <h5 class="fw-bold text-white mb-1 font-mono">5k – 10k MOQ</h5>
+                <p class="small text-light opacity-75 mb-2">Free plate setup fee for institutional orders above 1,000 copies.</p>
+                <div class="pt-2 border-top border-white border-opacity-25 font-mono small text-warning">
+                    <i class="fas fa-file-shield me-1"></i> Digital Proof Sign-off Included
+                </div>
+                <div class="mt-2 font-mono small text-light opacity-90">
+                    <i class="fas fa-landmark me-1"></i> Act 896 (3% WHT) Invoicing
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ CITATIONS & INSTITUTIONAL TRUST STRIP ═══════════════════════ -->
+<div class="cv-card p-4 mb-4 border border-primary border-opacity-20 shadow-sm" style="background: linear-gradient(135deg, rgba(11, 37, 69, 0.02) 0%, rgba(11, 37, 69, 0.06) 100%);">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <span class="badge bg-primary font-mono text-uppercase" style="font-size: 0.65rem;">Accreditation & Standards</span>
+            <h5 class="fw-bold m-0 mt-1" style="color: var(--cv-primary);">
+                <i class="fas fa-certificate text-warning me-2"></i>Corporate Citations & Quality Benchmarks
+            </h5>
+        </div>
+        <div>
+            <a href="{% url 'core:citations' %}" class="btn btn-sm btn-outline-primary font-mono">
+                View Full Citations Dossier &rarr;
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        {% for cite in citations_data %}
+        <div class="col-md-6 col-xl-3">
+            <div class="p-3 bg-white rounded-3 border h-100 shadow-sm d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge bg-{{ cite.color }}-subtle text-{{ cite.color }} border border-{{ cite.color }}-subtle font-mono" style="font-size: 0.68rem;">
+                            {{ cite.badge }}
+                        </span>
+                        <i class="{{ cite.icon }} text-{{ cite.color }}"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.88rem;">{{ cite.title }}</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.78rem; line-height: 1.5;">
+                        {{ cite.desc }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════════ CHANNELS OVERVIEW BANNER ═══════════════════════ -->
+<div class="row g-3 mb-4 text-center">
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <i class="fas fa-book-open fa-2x text-danger mb-2"></i>
+            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Custom Books (5k–10k)</h6>
+            <small class="text-muted font-mono" style="font-size: 0.72rem;">School crests, anthems & rulings</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <i class="fas fa-boxes-stacked fa-2x text-primary mb-2"></i>
+            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">B2B Wholesale</h6>
+            <small class="text-muted font-mono" style="font-size: 0.72rem;">Bulk paper cartons for bookshops</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <i class="fas fa-file-shield fa-2x text-warning mb-2"></i>
+            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Institutional Proformas</h6>
+            <small class="text-muted font-mono" style="font-size: 0.72rem;">GRA 3% WHT Act 896 invoices</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <i class="fas fa-truck-fast fa-2x text-info mb-2"></i>
+            <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Regional Bus Waybills</h6>
+            <small class="text-muted font-mono" style="font-size: 0.72rem;">VIP, OA & Imperial terminal dispatch</small>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ PRODUCT CATALOG (2-COLUMN MOBILE GRID) ═══════════════════════ -->
+<div class="cv-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h5 class="fw-bold m-0" style="color: var(--cv-primary);">Stationery & Book Catalog</h5>
+            <small class="text-muted">Available classroom stock and custom book lines in Sunyani</small>
+        </div>
+        <div>
+            <span class="badge bg-secondary font-mono" style="font-size: 0.7rem;">Stock counts concealed per company policy</span>
+        </div>
+    </div>
+
+    <!-- 2-Column Mobile Catalog Grid -->
+    <div class="row g-2 g-sm-3 g-lg-4">
+        {% for p in products %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="product-card">
+                    <div class="product-thumbnail-frame">
+                        <i class="{{ p.icon_class }} fa-3x"></i>
+                        <div style="position: absolute; top: 8px; left: 8px;">
+                            <span class="{{ p.stock_badge_class }}">
+                                <i class="fas fa-circle-check me-1"></i>{{ p.get_stock_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="product-card-body">
+                        <span class="text-muted text-uppercase font-mono" style="font-size: 0.65rem;">{{ p.category.name }}</span>
+                        <h3 class="product-title" title="{{ p.name }}">{{ p.name }}</h3>
+                        <div class="product-price-box">
+                            <div class="product-price-retail font-mono">GH₵ {{ p.retail_price }}</div>
+                            <div class="product-price-wholesale font-mono">Wholesale: GH₵ {{ p.wholesale_price }} ({{ p.wholesale_box_size }})</div>
+                        </div>
+                        <div class="mt-3">
+                            <form method="post" action="{% url 'orders_public:cart_add' p.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-sm btn-outline-primary w-100 font-mono" style="font-size: 0.8rem; font-weight: 600;">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Order
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ═══════════════════════ FOUNDER'S VISION & INSTITUTIONAL TRUST ═══════════════════════ -->
+<div class="cv-card p-4 p-md-5 mb-4 shadow-sm">
+    <div class="row align-items-center g-4">
+        <div class="col-md-3 text-center">
+            <div class="rounded-circle bg-primary bg-opacity-10 text-primary mx-auto d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 100px; height: 100px; font-size: 2.2rem; border: 3px solid var(--cv-primary);">
+                AS
+            </div>
+            <h6 class="fw-bold mt-2 mb-0" style="color: var(--cv-primary);">Mr. Aseim Solomon</h6>
+            <small class="text-muted font-mono d-block">Founder & CEO</small>
+        </div>
+        <div class="col-md-9 border-start-md ps-md-4">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle font-mono mb-2">Executive Commitment</span>
+            <blockquote class="font-mono text-dark fw-bold fs-5 mb-2" style="border-left: 3px solid var(--cv-accent); padding-left: 12px;">
+                "Build with purpose, serve with integrity, and grow by creating value for others."
+            </blockquote>
+            <p class="text-muted small mb-0" style="line-height: 1.7;">
+                Naito De Saint Enterprise was established in Sunyani with a single guiding mission: to provide Ghanaian schools, headmasters, and educational distributors direct access to high-grade paper products, zero-error custom book print runs, and inter-regional delivery without the middleman markup.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ QUICK ACCESS CARDS ═══════════════════════ -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold m-0" style="color: var(--cv-primary);">
+                    <i class="fas fa-book-open text-warning me-2"></i> School Customizer (5k–10k)
+                </h5>
+                <span class="badge bg-warning text-dark font-mono">Flagship</span>
+            </div>
+            <p class="text-muted small">
+                Configure school crests, 40/60/80-page rulings, Note 1/3 books, and generate instant institutional quotations compliant with 3% Withholding Tax (Act 896).
+            </p>
+            <a href="{% url 'customizer:configurator' %}" class="btn btn-sm btn-outline-primary font-mono">
+                Launch Configurator &rarr;
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold m-0" style="color: var(--cv-primary);">
+                    <i class="fas fa-phone text-info me-2"></i> Sunyani Sales & Dispatch Desk
+                </h5>
+                <span class="badge bg-info text-dark font-mono">Support</span>
+            </div>
+            <p class="text-muted small">
+                Direct dispatch manifests across Bono, Ahafo, Ashanti, Northern, and Western North regions via VIP Jeoun, OA Travel, Imperial Express, and Metro Mass Transit.
+            </p>
+            <a href="{% url 'core:contact' %}" class="btn btn-sm btn-outline-info text-dark font-mono">
+                Contact Sunyani Hub &rarr;
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

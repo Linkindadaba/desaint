@@ -1,0 +1,362 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block title %}CEO Executive Dashboard — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}CEO Financial Command Center &bull; Executive Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="p-1 bg-white rounded-3 shadow-sm border border-secondary border-opacity-25" style="line-height: 1;">
+            <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" style="height: 48px; width: 48px; object-fit: contain; display: block;">
+        </div>
+        <div>
+            <h4 class="fw-bold m-0" style="color: var(--cv-primary);">CEO Management Dashboard</h4>
+            <small class="text-muted">Welcome back, <strong>Mr. Aseim Solomon</strong> &bull; Real-time operations, channel sales, and receivables.</small>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        {% if is_ceo %}
+        <a href="{% url 'managerial:credit_ledger' %}" class="btn btn-sm btn-outline-warning text-dark font-mono bg-warning">
+            <i class="fas fa-file-invoice-dollar me-1"></i> School Credit Ledger
+        </a>
+        {% endif %}
+        {% if is_logistics %}
+        <a href="{% url 'managerial:waybills' %}" class="btn btn-sm btn-outline-primary font-mono">
+            <i class="fas fa-truck-fast me-1"></i> Bus Waybill Tracker
+        </a>
+        {% endif %}
+        {% if is_cashier %}
+        <a href="{% url 'orders:pos_terminal' %}" class="btn btn-sm btn-outline-success font-mono">
+            <i class="fas fa-cash-register me-1"></i> Counter POS
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- METRIC KPI CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Today's Counter POS</span>
+                    <h3 class="font-mono fw-bold text-success my-1" style="font-size: 1.7rem;">GH₵ {{ stats.today_sales }}</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">Walk-ins at Sunyani Main</small>
+                </div>
+                <i class="fas fa-receipt fa-2x text-success opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Monthly Gross Revenue</span>
+                    <h3 class="font-mono fw-bold text-dark my-1" style="font-size: 1.7rem;">GH₵ {{ stats.monthly_revenue }}</h3>
+                    <small class="text-success fw-bold font-mono" style="font-size: 0.75rem;"><i class="fas fa-arrow-trend-up me-1"></i>18.5% growth</small>
+                </div>
+                <i class="fas fa-chart-line fa-2x text-primary opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Active School Print Runs</span>
+                    <h3 class="font-mono fw-bold text-primary my-1" style="font-size: 1.7rem;">{{ stats.custom_copies_in_production|floatformat:0 }}</h3>
+                    <small class="text-muted" style="font-size: 0.75rem;">Across {{ stats.active_custom_orders }} institutional orders</small>
+                </div>
+                <i class="fas fa-school-flag fa-2x text-warning opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">School Credit Outstanding</span>
+                    <h3 class="font-mono fw-bold text-danger my-1" style="font-size: 1.7rem;">GH₵ {{ stats.school_debt_outstanding }}</h3>
+                    <a href="{% url 'managerial:credit_ledger' %}" class="small text-danger fw-bold font-mono" style="font-size: 0.75rem;">Manage term debt &rarr;</a>
+                </div>
+                <i class="fas fa-hand-holding-dollar fa-2x text-danger opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ REVENUE TRAJECTORY GRAPH ANALYTICS ═══════════════════════ -->
+<div class="cv-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <span class="badge bg-primary font-mono text-uppercase" style="font-size: 0.65rem;">Revenue Trajectory</span>
+            <h5 class="fw-bold m-0 mt-1" style="color: var(--cv-primary);">
+                <i class="fas fa-chart-line text-success me-2"></i>2026 Commercial Revenue & Growth Trajectory
+            </h5>
+            <small class="text-muted">Monthly billing curve across Custom School Books, Sunyani Counter POS, and B2B Wholesale</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'managerial:analytics' %}" class="btn btn-sm btn-primary font-mono">
+                <i class="fas fa-chart-pie me-1"></i> Full Business Analytics Suite &rarr;
+            </a>
+        </div>
+    </div>
+    <div style="height: 220px; position: relative;">
+        <canvas id="dashboardRevenueChart"></canvas>
+    </div>
+</div>
+
+<!-- ═══════════════════════ EXECUTIVE BUSINESS BI & ANALYTICS ═══════════════════════ -->
+<div class="row g-4 mb-4">
+    <!-- Channel Revenue Mix -->
+    <div class="col-lg-6">
+        <div class="cv-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold m-0" style="color: var(--cv-primary);">
+                        <i class="fas fa-chart-pie me-2 text-primary"></i>Revenue Mix by Commercial Channel
+                    </h5>
+                    <small class="text-muted font-mono">Gross Total: GH₵ {{ channel_bi.channel_total }}</small>
+                </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-mono">Business BI</span>
+            </div>
+
+            <!-- Segmented Progress Bar (Offline Guaranteed) -->
+            <div class="progress mb-3" style="height: 14px; border-radius: 8px;">
+                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ channel_bi.custom_pct }}%;" title="Custom Orders: {{ channel_bi.custom_pct }}%"></div>
+                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ channel_bi.wholesale_pct }}%;" title="B2B Wholesale: {{ channel_bi.wholesale_pct }}%"></div>
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ channel_bi.pos_pct }}%;" title="Counter POS: {{ channel_bi.pos_pct }}%"></div>
+            </div>
+
+            <!-- Metric Breakdown List -->
+            <div class="d-flex flex-column gap-2 mt-3">
+                <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center font-mono small">
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="d-inline-block rounded-circle bg-danger" style="width: 10px; height: 10px;"></span>
+                        <span class="text-dark">School Custom Books (5k–10k)</span>
+                    </span>
+                    <span class="fw-bold text-dark">GH₵ {{ channel_bi.custom_amount }} <span class="text-muted fw-normal">({{ channel_bi.custom_pct }}%)</span></span>
+                </div>
+                <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center font-mono small">
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="d-inline-block rounded-circle bg-primary" style="width: 10px; height: 10px;"></span>
+                        <span class="text-dark">B2B Wholesale & Invoiced</span>
+                    </span>
+                    <span class="fw-bold text-dark">GH₵ {{ channel_bi.wholesale_amount }} <span class="text-muted fw-normal">({{ channel_bi.wholesale_pct }}%)</span></span>
+                </div>
+                <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center font-mono small">
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="d-inline-block rounded-circle bg-success" style="width: 10px; height: 10px;"></span>
+                        <span class="text-dark">Walk-in Counter POS (Sunyani)</span>
+                    </span>
+                    <span class="fw-bold text-dark">GH₵ {{ channel_bi.pos_amount }} <span class="text-muted fw-normal">({{ channel_bi.pos_pct }}%)</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Term Credit Recovery & Risk -->
+    <div class="col-lg-6">
+        <div class="cv-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold m-0" style="color: var(--cv-primary);">
+                        <i class="fas fa-file-invoice-dollar me-2 text-danger"></i>Term Credit Recovery Rate
+                    </h5>
+                    <small class="text-muted font-mono">Academic Term Debt Exposure</small>
+                </div>
+                <span class="badge {% if credit_bi.recovery_pct >= 60 %}bg-success{% else %}bg-warning text-dark{% endif %} font-mono">
+                    {{ credit_bi.recovery_pct }}% Collected
+                </span>
+            </div>
+
+            <!-- Dual-color Recovery Progress Bar -->
+            <div class="progress mb-3" style="height: 14px; border-radius: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ credit_bi.recovery_pct }}%;" title="Recovered: {{ credit_bi.recovery_pct }}%"></div>
+                <div class="progress-bar bg-danger" role="progressbar" style="width: {{ credit_bi.outstanding_pct }}%;" title="Outstanding: {{ credit_bi.outstanding_pct }}%"></div>
+            </div>
+
+            <div class="row g-2 text-center font-mono small mb-3">
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded border">
+                        <span class="text-muted d-block" style="font-size: 0.7rem;">Invoiced Credit</span>
+                        <strong class="text-dark">GH₵ {{ credit_bi.total_granted }}</strong>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded border">
+                        <span class="text-muted d-block" style="font-size: 0.7rem;">Cash Collected</span>
+                        <strong class="text-success">GH₵ {{ credit_bi.total_recovered }}</strong>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 bg-light rounded border">
+                        <span class="text-muted d-block" style="font-size: 0.7rem;">Outstanding</span>
+                        <strong class="text-danger">GH₵ {{ credit_bi.total_outstanding }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                <div class="small font-mono">
+                    {% if credit_bi.overdue_count > 0 %}
+                    <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>{{ credit_bi.overdue_count }} Overdue Accounts</span>
+                    {% else %}
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>All Accounts Current</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'managerial:credit_ledger' %}" class="btn btn-sm btn-outline-danger font-mono" style="font-size: 0.78rem;">
+                    <i class="fas fa-arrow-right me-1"></i> Manage Ledger
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CASH FLOW & RECENT TRANSACTIONS -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="cv-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0" style="color: var(--cv-primary);">Recent Channel Transactions</h5>
+                <span class="badge bg-secondary font-mono">Live Feed</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle small font-mono">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Channel</th>
+                            <th>Client / Institution</th>
+                            <th>Items</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ord in recent_orders %}
+                            <tr>
+                                <td class="fw-bold">{{ ord.id }}</td>
+                                <td>
+                                    <span class="badge {% if ord.channel == 'Counter POS' %}bg-info text-dark{% elif ord.channel == 'B2B Wholesale' %}bg-primary{% elif ord.channel == 'School Custom' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ ord.channel }}
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-dark">{{ ord.client }}</td>
+                                <td class="text-muted">{{ ord.items }}</td>
+                                <td class="fw-bold text-dark">GH₵ {{ ord.total }}</td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        {{ ord.status }}
+                                    </span>
+                                </td>
+                                <td class="text-muted">{{ ord.time }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="cv-card p-4 h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">Cash Flow & Balances</h5>
+
+            <div class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small"><i class="fas fa-mobile-screen text-warning me-1"></i> MTN MoMo Till:</span>
+                    <span class="font-mono fw-bold fs-5 text-dark">GH₵ {{ stats.momo_balance }}</span>
+                </div>
+                <small class="text-muted d-block font-mono">Merchant: Desaint Stationeries Sunyani</small>
+            </div>
+
+            <div class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-muted small"><i class="fas fa-money-bill-wave text-success me-1"></i> Cash in Till:</span>
+                    <span class="font-mono fw-bold fs-5 text-dark">GH₵ {{ stats.cash_in_till }}</span>
+                </div>
+                <small class="text-muted d-block font-mono">Counter Drawer #01 (Sunyani)</small>
+            </div>
+
+            <h6 class="fw-bold mt-4 mb-2 small text-uppercase" style="color: var(--cv-primary);">Regional Parcel Status</h6>
+            <div class="alert alert-info p-2 small font-mono m-0">
+                <i class="fas fa-truck-fast me-1"></i> <strong>{{ stats.waybills_in_transit }} consignments in transit:</strong><br>
+                &bull; VIP Bus to Kumasi (Asafo)<br>
+                &bull; OA Bus to Tamale<br>
+                <a href="{% url 'managerial:waybills' %}" class="fw-bold text-decoration-none">View full waybill tracker &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offline-First Local Chart.js Script -->
+<script src="{% static 'js/chart.umd.min.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorNavy = '#0B2545';
+    const colorGreen = '#10B981';
+
+    const months = {{ months_json|safe }};
+    const revenueData = {{ revenue_trend_json|safe }};
+
+    const canvas = document.getElementById('dashboardRevenueChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Gross Monthly Sales (GH₵)',
+                    data: revenueData,
+                    borderColor: colorNavy,
+                    backgroundColor: 'rgba(11, 37, 69, 0.08)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: colorNavy,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) {
+                                return ' Revenue: GH₵ ' + c.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: "'JetBrains Mono', monospace", size: 10 },
+                            callback: function(v) { return 'GH₵ ' + (v / 1000) + 'k'; }
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    },
+                    x: {
+                        ticks: { font: { family: "'JetBrains Mono', monospace", size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

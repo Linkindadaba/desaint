@@ -1,0 +1,298 @@
+{% extends base_template|default:"base_admin.html" %}
+{% load static %}
+
+{% block title %}School Exercise Book Customizer (5k–10k MOQ) — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}School Book Customizer &bull; High-Volume Printing{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">School Book Configurator & Pricing Engine</h4>
+        <small class="text-muted">Direct factory customized printing for basic schools, SHS, colleges, and educational distributors across Ghana.</small>
+    </div>
+    <div>
+        <a href="{% url 'customizer:proof_sample' %}" class="btn btn-sm btn-outline-primary font-mono">
+            <i class="fas fa-file-signature me-1"></i> View Digital Proof Sign-off Demo
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT: 3D BOOK COVER PREVIEW -->
+    <div class="col-lg-5">
+        <div class="cv-card p-4 sticky-top" style="top: 80px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small text-uppercase font-mono text-muted fw-bold">Live Cover Mockup</span>
+                <span id="moqBadge" class="badge bg-success font-mono">MOQ Satisfied</span>
+            </div>
+
+            <!-- 3D Book Cover Canvas -->
+            <div id="bookMockup" style="
+                aspect-ratio: 3 / 4;
+                background: linear-gradient(145deg, #0B2545 0%, #153e70 100%);
+                border-radius: 8px 16px 16px 8px;
+                box-shadow: -8px 12px 24px rgba(0,0,0,0.25), inset 4px 0 8px rgba(255,255,255,0.15), inset -4px 0 8px rgba(0,0,0,0.4);
+                position: relative;
+                padding: 24px;
+                color: #ffffff;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                border-left: 10px solid #07162c;
+            ">
+                <!-- Spine Crease Effect -->
+                <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.1);"></div>
+
+                <!-- Book Header -->
+                <div class="text-center pt-2">
+                    <div style="font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #cbd5e1; font-family: var(--font-mono);">
+                        Desaint Educational Series
+                    </div>
+                    <h4 id="previewSchoolName" class="mt-2 fw-bold" style="font-size: 1.15rem; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                        ST. JAMES SEMINARY SHS
+                    </h4>
+                    <div id="previewSchoolMotto" class="fst-italic small text-light opacity-75">
+                        "Virtus et Scientia"
+                    </div>
+                </div>
+
+                    <!-- School Crest Centerpiece -->
+                    <div class="text-center my-auto py-3">
+                        <div id="crestPlaceholder" style="
+                            width: 105px;
+                            height: 105px;
+                            margin: 0 auto;
+                            background: rgba(255,255,255,0.95);
+                            border: 3px solid #D90429;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            overflow: hidden;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                            padding: 6px;
+                        ">
+                            <img id="crestImagePreview" src="{% static 'img/logo.jpeg' %}" alt="Crest" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <span class="badge bg-danger mt-2 font-mono" style="font-size: 0.65rem;">OFFICIAL CREST &bull; NDS</span>
+                    </div>
+
+                <!-- Book Footer Specs -->
+                <div class="text-center border-top pt-2" style="border-color: rgba(255,255,255,0.2) !important;">
+                    <div id="previewRuling" class="fw-bold font-mono" style="font-size: 0.85rem; color: #ffdd57;">
+                        80 PAGES &middot; SINGLE LINE
+                    </div>
+                    <div class="d-flex justify-content-between small text-light opacity-75 mt-2 font-mono" style="font-size: 0.7rem;">
+                        <span>NAME: __________________</span>
+                        <span>CLASS: _______</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Misprint Guarantee Note -->
+            <div class="mt-3 p-2 rounded bg-light border text-center" style="font-size: 0.75rem; color: var(--text-muted);">
+                <i class="fas fa-shield-halved text-primary me-1"></i> <strong>Zero Misprint Guarantee:</strong> Production begins only after proprietor approves digital artwork proof.
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: CONFIGURATOR CONTROLS & LIVE FINANCIAL BREAKDOWN -->
+    <div class="col-lg-7">
+        <form action="{% url 'customizer:submit' %}" method="post" enctype="multipart/form-data" class="cv-card p-4">
+            {% csrf_token %}
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">1. School Identification</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-7">
+                    <label class="form-label small fw-bold">School Name</label>
+                    <input id="inputSchoolName" name="school_name" type="text" class="form-control form-control-sm" value="St. James Seminary Senior High" oninput="updateMockup()" required>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold">School Motto / Slogan</label>
+                    <input id="inputSchoolMotto" name="school_motto" type="text" class="form-control form-control-sm" value="Virtus et Scientia" oninput="updateMockup()">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Headmaster / Bursar Name</label>
+                    <input name="proprietor_name" type="text" class="form-control form-control-sm" value="Rev. Fr. Emmanuel Mensah" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Phone Number (MoMo / WhatsApp)</label>
+                    <input name="contact_phone" type="text" class="form-control form-control-sm" value="024 400 1122" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-bold">Campus Delivery Location</label>
+                    <input name="delivery_location" type="text" class="form-control form-control-sm" value="Sunyani Campus, Bono Region" required>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">2. Exercise Book Ruling & Specs</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label class="form-label small fw-bold">Select Ruling & Book Format</label>
+                    <select id="selectRuling" name="ruling_id" class="form-select form-select-sm" onchange="calculateQuote()">
+                        {% for r in rulings %}
+                            <option value="{{ r.id }}" data-unit-price="{{ r.base_unit_price }}" data-ruling-name="{{ r.name }}" {% if r.is_popular %}selected{% endif %}>
+                                {{ r.name }} — GH₵ {{ r.base_unit_price|floatformat:2 }} / copy
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Paper Quality</label>
+                    <select name="paper_quality" class="form-select form-select-sm">
+                        <option selected>70gsm Premium White Bond (Standard)</option>
+                        <option>80gsm Extra Heavyweight Bond</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Cover Finish</label>
+                    <select name="cover_finish" class="form-select form-select-sm">
+                        <option selected>250gsm Art Card with Gloss Lamination</option>
+                        <option>250gsm Art Card with Matte Lamination</option>
+                        <option>Hardcover Bound (for Note 1 & Note 3)</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-bold">Back Cover Standard Content</label>
+                    <input name="back_cover_content" type="text" class="form-control form-control-sm" value="School Anthem, School Rules & Regulations, National Pledge">
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">3. School Crest & Artwork Upload</h5>
+            <div class="mb-4">
+                <div class="p-3 border rounded bg-light">
+                    <label class="form-label small fw-bold d-block">Upload School Crest (PNG / JPG / PDF)</label>
+                    <input id="crestFileInput" name="school_crest" type="file" class="form-control form-control-sm mb-2" accept="image/*" onchange="previewCrestFile(event)">
+                    <small class="text-muted d-block">
+                        <i class="fas fa-info-circle me-1"></i> High-resolution vector or transparent PNG recommended for crisp offset litho printing. Leave blank to use standard crest placeholder.
+                    </small>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">4. Volume & Client MOQ Policy</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold">Order Quantity (Copies)</label>
+                    <input id="inputQty" name="quantity" type="number" class="form-control font-mono fw-bold text-primary" value="5000" min="1000" step="500" oninput="calculateQuote()">
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div id="moqWarning" class="alert alert-success py-2 px-3 m-0 small w-100 font-mono">
+                        <i class="fas fa-check-circle me-1"></i> <strong>Meets High-Volume MOQ</strong> (5,000–10,000 copies)
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE QUOTE BREAKDOWN (WITH 3% WHT ACT 896 DEDUCTION) -->
+            <div class="p-4 border rounded bg-light mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold m-0" style="color: var(--cv-primary);">Institutional Quotation Summary</h6>
+                    <span class="badge bg-secondary font-mono">GRA Dual-Mode Ready</span>
+                </div>
+
+                <div class="d-flex justify-content-between small py-1">
+                    <span class="text-muted">Unit Print Price:</span>
+                    <span id="summaryUnitPrice" class="font-mono fw-bold">GH₵ 3.20</span>
+                </div>
+                <div class="d-flex justify-content-between small py-1">
+                    <span class="text-muted">Printing Plate & Film Setup:</span>
+                    <span id="summaryPlateFee" class="font-mono fw-bold text-success">GH₵ 0.00 (Waived &gt;1k pcs)</span>
+                </div>
+                <div class="d-flex justify-content-between small py-1">
+                    <span class="text-muted">Gross Order Total:</span>
+                    <span id="summaryGrossTotal" class="font-mono fw-bold text-dark">GH₵ 16,000.00</span>
+                </div>
+                <div class="d-flex justify-content-between small py-1 text-danger">
+                    <span>Less Statutory 3% WHT (Act 896):</span>
+                    <span id="summaryWHT" class="font-mono fw-bold">- GH₵ 480.00</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-3 mt-2 border-top">
+                    <div>
+                        <div class="fw-bold fs-5 text-danger font-mono">Net Payable by School:</div>
+                        <small class="text-muted font-mono">Paid via MoMo Till / GCB Transfer</small>
+                    </div>
+                    <div id="summaryNetPayable" class="font-mono fw-bold fs-4 text-danger">
+                        GH₵ 15,520.00
+                    </div>
+                </div>
+
+                <div class="mt-4 d-grid gap-2">
+                    <button type="submit" class="btn btn-danger py-2 fw-bold font-mono">
+                        <i class="fas fa-file-contract me-1"></i> Generate Official Digital Proof & Proforma Link
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateMockup() {
+    const schoolName = document.getElementById('inputSchoolName').value.trim() || 'YOUR SCHOOL NAME';
+    const schoolMotto = document.getElementById('inputSchoolMotto').value.trim() || '"Quality & Excellence"';
+    document.getElementById('previewSchoolName').textContent = schoolName.toUpperCase();
+    document.getElementById('previewSchoolMotto').textContent = '"' + schoolMotto + '"';
+}
+
+function calculateQuote() {
+    const rulingSelect = document.getElementById('selectRuling');
+    const selectedOption = rulingSelect.options[rulingSelect.selectedIndex];
+    const unitPrice = parseFloat(selectedOption.getAttribute('data-unit-price')) || 3.20;
+    const rulingName = selectedOption.getAttribute('data-ruling-name') || 'Single Line';
+    const qty = parseInt(document.getElementById('inputQty').value) || 0;
+
+    // Update ruling display on book cover mockup
+    document.getElementById('previewRuling').textContent = rulingName.toUpperCase();
+
+    // Plate fee logic: Free for orders >= 1,000
+    const plateFee = qty >= 1000 ? 0.00 : 350.00;
+    const grossTotal = (qty * unitPrice) + plateFee;
+    const whtDeduction = grossTotal * 0.03; // 3% GRA WHT Act 896
+    const netPayable = grossTotal - whtDeduction;
+
+    // MOQ validation: 5,000 to 10,000 copies
+    const moqBadge = document.getElementById('moqBadge');
+    const moqWarning = document.getElementById('moqWarning');
+
+    if (qty >= 5000) {
+        moqBadge.className = 'badge bg-success font-mono';
+        moqBadge.textContent = 'MOQ Satisfied (5k–10k)';
+        moqWarning.className = 'alert alert-success py-2 px-3 m-0 small w-100 font-mono';
+        moqWarning.innerHTML = '<i class="fas fa-check-circle me-1"></i> <strong>Meets High-Volume MOQ</strong> (5,000–10,000 copies)';
+    } else {
+        moqBadge.className = 'badge bg-warning text-dark font-mono';
+        moqBadge.textContent = 'Under Standard MOQ';
+        moqWarning.className = 'alert alert-warning py-2 px-3 m-0 small w-100 font-mono';
+        moqWarning.innerHTML = '<i class="fas fa-triangle-exclamation me-1"></i> <strong>Below standard school MOQ (5,000 copies).</strong> Subject to management approval.';
+    }
+
+    // Update Financials
+    document.getElementById('summaryUnitPrice').textContent = 'GH₵ ' + unitPrice.toFixed(2);
+    document.getElementById('summaryPlateFee').textContent = plateFee === 0 
+        ? 'GH₵ 0.00 (Waived >1k pcs)' 
+        : 'GH₵ ' + plateFee.toFixed(2);
+    document.getElementById('summaryGrossTotal').textContent = 'GH₵ ' + grossTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('summaryWHT').textContent = '- GH₵ ' + whtDeduction.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('summaryNetPayable').textContent = 'GH₵ ' + netPayable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function previewCrestFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewImg = document.getElementById('crestImagePreview');
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Initial calculation on load
+window.addEventListener('DOMContentLoaded', () => {
+    updateMockup();
+    calculateQuote();
+});
+</script>
+{% endblock %}
+

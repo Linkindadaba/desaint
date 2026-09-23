@@ -1,0 +1,156 @@
+{% extends "base_storefront.html" %}
+{% load static %}
+
+{% block title %}About Us — {{ COMPANY_NAME }} ({{ BRAND_NAME }}){% endblock %}
+
+{% block content %}
+<!-- ABOUT HERO SECTION -->
+<div class="mb-4" style="background: linear-gradient(135deg, #0B2545 0%, #153e70 60%, #1e293b 100%); border-radius: var(--radius-md); padding: 3rem 2rem; color: #ffffff;">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <span class="badge bg-danger px-3 py-1 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-2 font-mono">
+                <i class="fas fa-landmark"></i> Naito De Saint Enterprise
+            </span>
+            <h1 class="h1 fw-bold text-white mb-2" style="letter-spacing: -0.5px;">
+                Write. Create. Inspire.
+            </h1>
+            <p class="fs-5 text-warning font-mono mb-3">
+                "Quality You See and Trust."
+            </p>
+            <p class="text-light opacity-90 mb-4" style="max-width: 660px; line-height: 1.7;">
+                Based in <strong>Sunyani, Bono Region</strong>, {{ BRAND_NAME }} is an integrated educational manufacturing and supply enterprise. We bridge international paper importation, in-house graphic design, and factory-level school exercise book printing for basic schools, colleges, and educational distributors across Ghana.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'customizer:configurator' %}" class="btn btn-warning text-dark fw-bold px-4 py-2 font-mono">
+                    <i class="fas fa-book-open me-1"></i> Custom Book Configurator
+                </a>
+                <a href="{% url 'core:citations' %}" class="btn btn-outline-light px-4 py-2 font-mono">
+                    <i class="fas fa-award me-1"></i> View Citations & Accreditations
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 text-center d-none d-lg-block">
+            <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 shadow-sm">
+                <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" class="img-fluid rounded-3 mb-3 bg-white p-2 shadow-sm" style="max-height: 110px;">
+                <h6 class="fw-bold text-white font-mono mb-1">{{ COMPANY_NAME }}</h6>
+                <p class="small text-light opacity-75 font-mono mb-0">Sunyani Commercial Operations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOUNDER & EXECUTIVE LEADERSHIP -->
+<div class="cv-card p-4 p-md-5 mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-md-4 text-center">
+            <div class="rounded-circle bg-primary bg-opacity-10 text-primary mx-auto d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 140px; height: 140px; font-size: 3rem; border: 4px solid var(--cv-primary);">
+                AS
+            </div>
+            <h5 class="fw-bold mt-3 mb-0" style="color: var(--cv-primary);">Mr. Aseim Solomon</h5>
+            <span class="badge bg-danger font-mono mt-1">Founder & Managing Director</span>
+            <p class="text-muted small mt-2 mb-0 font-mono">Community Health Practitioner & Educational Entrepreneur</p>
+        </div>
+        <div class="col-md-8 border-start-md ps-md-4">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-mono mb-2">Executive Leadership Philosophy</span>
+            <blockquote class="blockquote font-mono fs-5 text-dark fw-semibold mb-3" style="border-left: 4px solid var(--cv-accent); padding-left: 1rem;">
+                "Build with purpose, serve with integrity, and grow by creating value for others."
+            </blockquote>
+            <p class="text-muted small mb-3" style="line-height: 1.8;">
+                With over five years of dedicated practical leadership in educational materials importation, stationery supply, and commercial print distribution, <strong>Mr. Aseim Solomon</strong> brings a disciplined community-first ethos to Ghana's educational sector.
+            </p>
+            <p class="text-muted small mb-0" style="line-height: 1.8;">
+                Combining a professional health background with astute supply-chain management, he established <strong>Naito De Saint Enterprise</strong> to guarantee that schools outside Accra receive factory-direct, high-grade stationery with zero logistical compromise and transparent statutory tax invoicing.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- 5 INTEGRATED OPERATIONAL PILLARS -->
+<div class="mb-5">
+    <div class="text-center mb-4">
+        <span class="badge bg-secondary font-mono text-uppercase">Enterprise Infrastructure</span>
+        <h3 class="fw-bold mt-2" style="color: var(--cv-primary);">The 5 Pillars of Desaint Stationeries</h3>
+        <p class="text-muted small mx-auto" style="max-width: 600px;">
+            Our end-to-end operational capacity from international factory container orders to classroom desks.
+        </p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="cv-card p-4 h-100">
+                <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-3 d-inline-flex mb-3">
+                    <i class="fas fa-book-open fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">1. School Custom Book Works</h5>
+                <p class="text-muted small mb-0">
+                    High-volume specialized print runs (<strong class="text-danger font-mono">5,000–10,000 MOQ</strong>) for basic schools, SHS, and colleges with customized school crests, anthems, rules, and 40/60/80-page rulings.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="cv-card p-4 h-100">
+                <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-3 d-inline-flex mb-3">
+                    <i class="fas fa-palette fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">2. Creative Branding Studio</h5>
+                <p class="text-muted small mb-0">
+                    In-house graphic artists creating vector crests, student report card formats, teacher lesson notebooks, and institutional identities with mandatory digital proof sign-off before printing.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="cv-card p-4 h-100">
+                <div class="rounded-3 bg-success bg-opacity-10 text-success p-3 d-inline-flex mb-3">
+                    <i class="fas fa-ship fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">3. Direct Container Importation</h5>
+                <p class="text-muted small mb-0">
+                    Sourcing directly from paper mills and educational manufacturers across China and India, controlling landed costs to deliver unmatched wholesale prices in Bono and Ashanti regions.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="cv-card p-4 h-100">
+                <div class="rounded-3 bg-warning bg-opacity-10 text-dark p-3 d-inline-flex mb-3">
+                    <i class="fas fa-boxes-stacked fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">4. Wholesale & B2B Distribution</h5>
+                <p class="text-muted small mb-0">
+                    Supplying commercial bookshops, retail stationery stores, and school stores across Sunyani, Techiman, Berekum, Kumasi, and Northern Ghana with paper rims, pens, and exam answer booklets.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="cv-card p-4 h-100">
+                <div class="rounded-3 bg-info bg-opacity-10 text-info p-3 d-inline-flex mb-3">
+                    <i class="fas fa-truck-fast fa-2x"></i>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">5. Inter-Regional Bus Logistics</h5>
+                <p class="text-muted small mb-0">
+                    Direct Sunyani parcel dispatch agreements with VIP Jeoun, OA Travel, Imperial Express, and Metro Mass Transit, providing same-day or next-day terminal delivery across 8 regions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CALL TO ACTION -->
+<div class="p-4 p-md-5 rounded-4 text-center text-white" style="background: linear-gradient(135deg, #0B2545 0%, #060913 100%);">
+    <h3 class="fw-bold mb-2">Partner with Sunyani's Leading Educational Supplier</h3>
+    <p class="text-light opacity-75 mb-4 mx-auto" style="max-width: 600px;">
+        Whether you require 10,000 custom exercise books for the upcoming academic term or wholesale office paper supplies, we deliver with precision and official statutory compliance.
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap font-mono">
+        <a href="{% url 'customizer:configurator' %}" class="btn btn-warning text-dark fw-bold px-4 py-2">
+            <i class="fas fa-book-open me-1"></i> Configure School Books
+        </a>
+        <a href="{% url 'core:contact' %}" class="btn btn-outline-light px-4 py-2">
+            <i class="fas fa-envelope me-1"></i> Contact Head Office
+        </a>
+    </div>
+</div>
+{% endblock %}

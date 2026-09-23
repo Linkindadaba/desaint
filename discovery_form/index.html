@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desaint Stationeries — Client Discovery & Requirements Form</title>
+  <style>
+    :root {
+      --primary-dark: #0B2545;
+      --primary: #13315C;
+      --primary-light: #134074;
+      --accent: #D90429;
+      --accent-hover: #EF233C;
+      --bg-canvas: #EEF4F8;
+      --card-bg: #FFFFFF;
+      --text-main: #1D2D44;
+      --text-muted: #5C677D;
+      --border-color: #D0DBE5;
+      --success: #198754;
+      --shadow-sm: 0 2px 8px rgba(11, 37, 69, 0.06);
+      --shadow-md: 0 6px 20px rgba(11, 37, 69, 0.1);
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    /* Top Brand Header */
+    header.brand-banner {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: #fff;
+      padding: 24px 20px;
+      box-shadow: var(--shadow-md);
+      border-bottom: 4px solid var(--accent);
+    }
+
+    .header-container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand-logo-img {
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #fff;
+      padding: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-titles h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .brand-titles .tagline {
+      font-size: 0.95rem;
+      color: #b0c4de;
+      font-style: italic;
+    }
+
+    .brand-titles .badge-pill {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 10px;
+      background: rgba(217, 4, 41, 0.25);
+      border: 1px solid var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Container */
+    .app-container {
+      max-width: 960px;
+      margin: 28px auto 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Action bar */
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: #fff;
+    }
+    .btn-accent:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-outline {
+      background-color: #fff;
+      color: var(--primary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-outline:hover {
+      background-color: #f1f5f9;
+      border-color: var(--primary);
+    }
+
+    /* Step Navigation Bar */
+    .stepper {
+      display: flex;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .step-tab {
+      flex: 1;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+    .step-tab:last-child {
+      border-right: none;
+    }
+    .step-tab.active {
+      background-color: var(--primary);
+      color: #fff;
+    }
+    .step-tab.completed {
+      color: var(--success);
+    }
+    .step-tab span.num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .step-tab.active span.num {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Card Panels */
+    .panel {
+      display: none;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+    .panel.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+      border-bottom: 2px solid var(--bg-canvas);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .panel-header h2 {
+      font-size: 1.3rem;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .form-group .hint {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      background-color: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(19, 49, 92, 0.15);
+    }
+    textarea.form-control {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .row-2, .row-3 {
+        grid-template-columns: 1fr;
+      }
+      .stepper {
+        flex-direction: column;
+      }
+      .step-tab {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px;
+      }
+    }
+
+    /* Checkbox & Radio Cards */
+    .checkbox-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .check-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fafbfc;
+      transition: all 0.2s ease;
+    }
+    .check-card:hover {
+      background: #f0f5fa;
+      border-color: var(--primary);
+    }
+    .check-card input[type="checkbox"],
+    .check-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .check-card-content strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+      margin-bottom: 2px;
+    }
+    .check-card-content span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+      display: block;
+    }
+
+    /* Banner info callout */
+    .callout {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+    .callout-info {
+      background-color: #e8f1f8;
+      border-left: 4px solid var(--primary);
+      color: #0f3460;
+    }
+    .callout-gold {
+      background-color: #fff9e6;
+      border-left: 4px solid #d4a017;
+      color: #634700;
+    }
+
+    /* Footer Nav */
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Summary Modal or Table */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    .summary-table th, .summary-table td {
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .summary-table th {
+      background-color: #f1f5f9;
+      color: var(--primary-dark);
+      width: 35%;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .brand-banner {
+        background: none !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000;
+        padding: 10px 0;
+      }
+      .brand-titles h1 { color: #000 !important; }
+      .brand-titles .tagline { color: #444 !important; }
+      .top-actions, .stepper, .footer-nav, .btn {
+        display: none !important;
+      }
+      .panel {
+        display: block !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 10px 0 !important;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand Header -->
+  <header class="brand-banner">
+    <div class="header-container">
+      <img src="assets/logo.png" alt="Desaint Stationeries Logo" class="brand-logo-img" />
+      <div class="brand-titles">
+        <h1>DESAINT STATIONERIES</h1>
+        <p class="tagline">“Quality You See and Trust.” • Comprehensive Educational Supply & Customization</p>
+        <span class="badge-pill">Client Requirements & Discovery System</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Top Action Bar -->
+    <div class="top-actions">
+      <div>
+        <button type="button" class="btn btn-outline" onclick="loadCompanyDefaults()">
+          ⚡ Auto-Fill from Company Deck
+        </button>
+        <button type="button" class="btn btn-outline" onclick="resetForm()">
+          🔄 Reset Form
+        </button>
+      </div>
+      <div>
+        <button type="button" class="btn btn-outline" onclick="window.print()">
+          🖨️ Print / Save PDF
+        </button>
+        <button type="button" class="btn btn-accent" onclick="exportJSON()">
+          💾 Download Requirements (JSON)
+        </button>
+      </div>
+    </div>
+
+    <!-- Multi-Step Indicator -->
+    <div class="stepper">
+      <div class="step-tab active" id="tab-step-1" onclick="switchStep(1)">
+        <span class="num">1</span>
+        <span>Corporate Identity</span>
+      </div>
+      <div class="step-tab" id="tab-step-2" onclick="switchStep(2)">
+        <span class="num">2</span>
+        <span>Sales & Modules</span>
+      </div>
+      <div class="step-tab" id="tab-step-3" onclick="switchStep(3)">
+        <span class="num">3</span>
+        <span>School Customization</span>
+      </div>
+      <div class="step-tab" id="tab-step-4" onclick="switchStep(4)">
+        <span class="num">4</span>
+        <span>Ghana Tax & MoMo</span>
+      </div>
+      <div class="step-tab" id="tab-step-5" onclick="switchStep(5)">
+        <span class="num">5</span>
+        <span>Logistics & Review</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: Corporate Profile & Public Contact -->
+    <div class="panel active" id="step-1">
+      <div class="panel-header">
+        <h2>Step 1: Corporate Identity & Contacts</h2>
+        <p>Basic credentials and online presence for Naito De Saint Enterprise / Desaint Stationeries.</p>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Registered Business Name</label>
+          <input type="text" id="business_name" class="form-control" value="Naito De Saint Enterprise" />
+        </div>
+        <div class="form-group">
+          <label>Trading Name</label>
+          <input type="text" id="trading_name" class="form-control" value="Desaint Stationeries" />
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Founder & CEO</label>
+          <input type="text" id="ceo_name" class="form-control" value="Mr. Aseim Solomon" />
+        </div>
+        <div class="form-group">
+          <label>Head Office Location</label>
+          <input type="text" id="head_office" class="form-control" value="Sunyani, Bono Region, Ghana" />
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="form-group">
+          <label>Primary Phone / Voice</label>
+          <input type="text" id="phone_1" class="form-control" value="+233 20 015 2394" />
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Sales Line</label>
+          <input type="text" id="phone_2" class="form-control" value="+233 24 606 5822" />
+        </div>
+        <div class="form-group">
+          <label>Official Email</label>
+          <input type="email" id="email" class="form-control" value="Naitodesaint35@gmail.com" />
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Target Domain Name</label>
+          <input type="text" id="domain_name" class="form-control" placeholder="e.g. desaintstationeries.com" />
+          <span class="hint">Leave blank if you want SikaDev to acquire and register this on your behalf.</span>
+        </div>
+        <div class="form-group">
+          <label>Brand Slogan / Tagline</label>
+          <input type="text" id="brand_slogan" class="form-control" value="Quality You See and Trust. | Write. Create. Inspire." />
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <span></span>
+        <button type="button" class="btn btn-primary" onclick="switchStep(2)">Proceed to Sales & Modules &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Sales Channels & Storefront Scope -->
+    <div class="panel" id="step-2">
+      <div class="panel-header">
+        <h2>Step 2: Storefront & Customer Scope</h2>
+        <p>Define how schools, wholesalers, and retail customers will interact with the platform.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Which sales channels should be activated? (Select all that apply)</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="checkbox" id="mod_retail" checked />
+            <div class="check-card-content">
+              <strong>🛒 B2C Public Storefront</strong>
+              <span>General retail for individual parents, teachers, and students.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="mod_wholesale" checked />
+            <div class="check-card-content">
+              <strong>📦 B2B Wholesale Portal</strong>
+              <span>Carton/bulk pricing for bookshops, distributors, and stationery retail partners.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="mod_institutional" checked />
+            <div class="check-card-content">
+              <strong>🏫 Institutional & School Contracts</strong>
+              <span>Proforma invoices, school supplies tenders, and bulk term credit orders.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="mod_pos" checked />
+            <div class="check-card-content">
+              <strong>🏬 Walk-in Store Point of Sale (POS)</strong>
+              <span>Speedy counter checkout and receipt generation for Sunyani walk-in shoppers.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Customer Stock Display Policy</label>
+        <div class="callout callout-gold">
+          <strong>Strategic Note:</strong> Displaying exact low counts (e.g., "4 in stock") causes institutional and bulk buyers to leave because they assume you cannot fulfill 100+ units.
+        </div>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="radio" name="stock_display" value="badge_only" checked />
+            <div class="check-card-content">
+              <strong>Status Badges Only (Recommended)</strong>
+              <span>Displays "In Stock", "Available on Order", or "Backorder Allowed" without exact count.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="radio" name="stock_display" value="exact_count" />
+            <div class="check-card-content">
+              <strong>Literal Numeric Count</strong>
+              <span>Shows exact physical numbers (e.g. "Only 12 packs remaining").</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <button type="button" class="btn btn-outline" onclick="switchStep(1)">&larr; Back</button>
+        <button type="button" class="btn btn-primary" onclick="switchStep(3)">Proceed to School Customization &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: School Customization & Printing System -->
+    <div class="panel" id="step-3">
+      <div class="panel-header">
+        <h2>Step 3: School Book Customization & Printing</h2>
+        <p>Desaint Stationeries provides custom exercise books and branded school materials across Ghana.</p>
+      </div>
+
+      <div class="form-group">
+        <label>How should schools submit custom exercise book orders?</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="radio" name="custom_workflow" value="interactive_customizer" checked />
+            <div class="check-card-content">
+              <strong>Interactive Web Configurator (Recommended)</strong>
+              <span>Proprietors/Headmasters upload School Crest, select Ruling (Exercise, Note 1, Graph), pick page count, and see live digital preview.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="radio" name="custom_workflow" value="rfq_form" />
+            <div class="check-card-content">
+              <strong>Quote Request (RFQ) Form Only</strong>
+              <span>School fills simple form, staff manually contacts them with quotes and physical mockups.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Minimum Order Quantity (MOQ) for Custom Books</label>
+          <input type="text" id="custom_moq" class="form-control" value="500 copies" placeholder="e.g. 500 copies or 20 packs" />
+          <span class="hint">Minimum print run required per school cover design.</span>
+        </div>
+        <div class="form-group">
+          <label>Plate / Die Design Setup Fee</label>
+          <select id="plate_fee_policy" class="form-control">
+            <option value="included" selected>Included in Unit Cost (No upfront plate charge)</option>
+            <option value="fixed_fee">One-Time Setup Fee (e.g. GH¢ 150 per new cover design)</option>
+            <option value="free_above_threshold">Free if order exceeds 1,000 copies, otherwise billed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Supported Book & Ruling Categories</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="checkbox" id="book_exercise" checked />
+            <div class="check-card-content">
+              <strong>Standard Exercise Books</strong>
+              <span>40 pages, 60 pages, 80 pages (single line / broad line)</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="book_note1" checked />
+            <div class="check-card-content">
+              <strong>Note 1 & Note 3 Books</strong>
+              <span>120 to 200 pages hard / soft cover</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="book_preschool" checked />
+            <div class="check-card-content">
+              <strong>Pre-School & Kindergarten</strong>
+              <span>Double line, square grid, tracing, drawing sheets</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="book_graph" checked />
+            <div class="check-card-content">
+              <strong>Graph & Sketch Books</strong>
+              <span>Science & mathematical drawing books</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <button type="button" class="btn btn-outline" onclick="switchStep(2)">&larr; Back</button>
+        <button type="button" class="btn btn-primary" onclick="switchStep(4)">Proceed to Ghana Tax & MoMo &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Ghana Tax Compliance & Payment Methods -->
+    <div class="panel" id="step-4">
+      <div class="panel-header">
+        <h2>Step 4: Pricing, Invoicing & Ghana Tax Compliance</h2>
+        <p>Configure GRA VAT/Levies, Withholding Tax, and payment rails for retail and institutional customers.</p>
+      </div>
+
+      <div class="form-group">
+        <label>GRA Tax Invoicing Scheme</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="radio" name="gra_tax_scheme" value="non_vat" />
+            <div class="check-card-content">
+              <strong>Non-VAT Registered / Exempt</strong>
+              <span>Net prices only; standard non-VAT commercial sales receipts.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="radio" name="gra_tax_scheme" value="flat_rate" />
+            <div class="check-card-content">
+              <strong>GRA Flat Rate (3% + 1% COVID = 4%)</strong>
+              <span>Simplified flat rate scheme for general merchandise retailers.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="radio" name="gra_tax_scheme" value="standard_rate" />
+            <div class="check-card-content">
+              <strong>GRA Standard Rate (VAT 15% + Levies 6%)</strong>
+              <span>For institutional contracts, government supply tenders, and large corporate supplies.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="radio" name="gra_tax_scheme" value="multi_scheme" checked />
+            <div class="check-card-content">
+              <strong>Dual Mode (Standard for Institutional / Retail Slip for Walk-ins)</strong>
+              <span>Recommended: Allows institutional clients to receive statutory VAT invoices while retail is simplified.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Statutory Withholding Tax (WHT) on Institutional Invoices</label>
+        <div class="callout callout-info">
+          Under Ghana Income Tax Act, 2015 (Act 896), institutional buyers and government entities withhold 3% on goods supplies at the point of payment.
+        </div>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="checkbox" id="tax_wht_enabled" checked />
+            <div class="check-card-content">
+              <strong>Enable WHT Auto-Deduction for Institutional Invoices</strong>
+              <span>Automatically show Gross Total, 3% WHT Withheld, and Net Payable by School/Entity.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Accepted Payment Channels</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="checkbox" id="pay_momo_automated" checked />
+            <div class="check-card-content">
+              <strong>Automated Mobile Money (MTN & Telecel)</strong>
+              <span>Instant payment gateway integration (Paystack / Hubtel / local aggregator).</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="pay_momo_manual" checked />
+            <div class="check-card-content">
+              <strong>Manual MoMo Merchant Till / Number</strong>
+              <span>Customer pays to Desaint MoMo line and enters transaction ID for verification.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="pay_bank" checked />
+            <div class="check-card-content">
+              <strong>Direct Bank Transfer</strong>
+              <span>Displays official bank account details on institutional proformas.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="pay_cod" checked />
+            <div class="check-card-content">
+              <strong>Cash on Delivery / Store Pickup</strong>
+              <span>Physical settlement at Sunyani branch or upon delivery in Sunyani.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <button type="button" class="btn btn-outline" onclick="switchStep(3)">&larr; Back</button>
+        <button type="button" class="btn btn-primary" onclick="switchStep(5)">Proceed to Logistics & Review &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Regional Logistics, Staff Roles & Review -->
+    <div class="panel" id="step-5">
+      <div class="panel-header">
+        <h2>Step 5: Regional Logistics, Fulfillment & Review</h2>
+        <p>Distribution from Sunyani hub to Bono, Ashanti, Central and nationwide customers.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Active Fulfillment Logistics Models</label>
+        <div class="checkbox-cards">
+          <label class="check-card">
+            <input type="checkbox" id="ship_bus_terminal" checked />
+            <div class="check-card-content">
+              <strong>🚌 Bus Terminal Parcel Dispatch (VIP, OA, Imperial, Metro Mass)</strong>
+              <span>Parcel handed over at Sunyani terminal; customer collects at their local station.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="ship_in_store" checked />
+            <div class="check-card-content">
+              <strong>🏬 In-Store Customer Pickup</strong>
+              <span>Customer or school representative collects directly at Sunyani head office.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="ship_school_delivery" checked />
+            <div class="check-card-content">
+              <strong>🚚 Direct Institutional Truck/Van Delivery</strong>
+              <span>Desaint delivery vehicle transports bulk cartons directly to the school campus.</span>
+            </div>
+          </label>
+          <label class="check-card">
+            <input type="checkbox" id="ship_courier_local" checked />
+            <div class="check-card-content">
+              <strong>🛵 Local City Courier / Dispatch Rider</strong>
+              <span>Fast door-to-door delivery within Sunyani metropolis and nearby towns.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Primary Regional Focus Areas</label>
+        <input type="text" id="target_regions" class="form-control" value="Bono, Bono East, Ahafo, Ashanti, Central, Western North" />
+      </div>
+
+      <div class="form-group">
+        <label>Additional Notes / Special Instructions from Mr. Solomon</label>
+        <textarea id="additional_notes" class="form-control" placeholder="Any specific requirements, custom report templates, or integrations..."></textarea>
+      </div>
+
+      <div class="panel-header" style="margin-top: 30px;">
+        <h2>Summary & Responses Review</h2>
+        <p>Review the captured specifications before exporting or printing.</p>
+      </div>
+
+      <table class="summary-table" id="summary-table-view">
+        <!-- Dynamically generated on step entry -->
+      </table>
+
+      <div class="footer-nav">
+        <button type="button" class="btn btn-outline" onclick="switchStep(4)">&larr; Back</button>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ Print Final Brief</button>
+          <button type="button" class="btn btn-accent" onclick="exportJSON()">💾 Download JSON</button>
+      </div>
+    </div>
+
+    <!-- SikaDev Engineering Footer -->
+    <footer style="text-align:center; margin-top: 30px; padding: 20px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <img src="assets/sikadev_logo.jpg" alt="SikaDev Logo" style="width: 28px; height: 28px; border-radius: 5px; object-fit: cover;" />
+      <span>Engineered & Customized by <strong>SikaDev</strong> • Software Solutions for Ghanaian Enterprise</span>
+    </footer>
+  </div>
+
+  <script>
+    // State management & autosave
+    const STORAGE_KEY = 'desaint_stationeries_discovery_data';
+
+    function switchStep(stepIndex) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+
+      const targetPanel = document.getElementById(`step-${stepIndex}`);
+      const targetTab = document.getElementById(`tab-step-1`);
+      
+      if (targetPanel) targetPanel.classList.add('active');
+      for (let i = 1; i <= 5; i++) {
+        const tab = document.getElementById(`tab-step-${i}`);
+        if (i === stepIndex) tab.classList.add('active');
+        if (i < stepIndex) tab.classList.add('completed');
+      }
+
+      if (stepIndex === 5) {
+        renderSummaryTable();
+      }
+      saveToStorage();
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+
+    function getFormData() {
+      const data = {
+        meta: {
+          client: "Naito De Saint Enterprise",
+          trading_as: "Desaint Stationeries",
+          form_version: "1.0",
+          timestamp: new Date().toISOString()
+        },
+        corporate: {
+          business_name: document.getElementById('business_name').value,
+          trading_name: document.getElementById('trading_name').value,
+          ceo_name: document.getElementById('ceo_name').value,
+          head_office: document.getElementById('head_office').value,
+          phone_1: document.getElementById('phone_1').value,
+          phone_2: document.getElementById('phone_2').value,
+          email: document.getElementById('email').value,
+          domain_name: document.getElementById('domain_name').value,
+          brand_slogan: document.getElementById('brand_slogan').value
+        },
+        channels: {
+          b2c_retail: document.getElementById('mod_retail').checked,
+          b2b_wholesale: document.getElementById('mod_wholesale').checked,
+          institutional_school: document.getElementById('mod_institutional').checked,
+          pos_counter: document.getElementById('mod_pos').checked,
+          stock_display_policy: document.querySelector('input[name="stock_display"]:checked')?.value || 'badge_only'
+        },
+        customization: {
+          workflow: document.querySelector('input[name="custom_workflow"]:checked')?.value || 'interactive_customizer',
+          moq: document.getElementById('custom_moq').value,
+          plate_fee_policy: document.getElementById('plate_fee_policy').value,
+          books: {
+            exercise_books: document.getElementById('book_exercise').checked,
+            note1_books: document.getElementById('book_note1').checked,
+            preschool_books: document.getElementById('book_preschool').checked,
+            graph_sketch_books: document.getElementById('book_graph').checked
+          }
+        },
+        financials: {
+          gra_tax_scheme: document.querySelector('input[name="gra_tax_scheme"]:checked')?.value || 'multi_scheme',
+          wht_enabled: document.getElementById('tax_wht_enabled').checked,
+          payments: {
+            momo_automated: document.getElementById('pay_momo_automated').checked,
+            momo_manual: document.getElementById('pay_momo_manual').checked,
+            bank_transfer: document.getElementById('pay_bank').checked,
+            cash_on_delivery: document.getElementById('pay_cod').checked
+          }
+        },
+        logistics: {
+          bus_terminal_dispatch: document.getElementById('ship_bus_terminal').checked,
+          in_store_pickup: document.getElementById('ship_in_store').checked,
+          institutional_truck: document.getElementById('ship_school_delivery').checked,
+          local_city_courier: document.getElementById('ship_courier_local').checked,
+          target_regions: document.getElementById('target_regions').value,
+          additional_notes: document.getElementById('additional_notes').value
+        }
+      };
+      return data;
+    }
+
+    function saveToStorage() {
+      try {
+        const data = getFormData();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Storage not available', e);
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        if (data.corporate) {
+          if (data.corporate.business_name) document.getElementById('business_name').value = data.corporate.business_name;
+          if (data.corporate.trading_name) document.getElementById('trading_name').value = data.corporate.trading_name;
+          if (data.corporate.ceo_name) document.getElementById('ceo_name').value = data.corporate.ceo_name;
+          if (data.corporate.head_office) document.getElementById('head_office').value = data.corporate.head_office;
+          if (data.corporate.phone_1) document.getElementById('phone_1').value = data.corporate.phone_1;
+          if (data.corporate.phone_2) document.getElementById('phone_2').value = data.corporate.phone_2;
+          if (data.corporate.email) document.getElementById('email').value = data.corporate.email;
+          if (data.corporate.domain_name) document.getElementById('domain_name').value = data.corporate.domain_name;
+          if (data.corporate.brand_slogan) document.getElementById('brand_slogan').value = data.corporate.brand_slogan;
+        }
+        if (data.channels) {
+          document.getElementById('mod_retail').checked = !!data.channels.b2c_retail;
+          document.getElementById('mod_wholesale').checked = !!data.channels.b2b_wholesale;
+          document.getElementById('mod_institutional').checked = !!data.channels.institutional_school;
+          document.getElementById('mod_pos').checked = !!data.channels.pos_counter;
+          if (data.channels.stock_display_policy) {
+            const rad = document.querySelector(`input[name="stock_display"][value="${data.channels.stock_display_policy}"]`);
+            if (rad) rad.checked = true;
+          }
+        }
+        if (data.customization) {
+          if (data.customization.moq) document.getElementById('custom_moq').value = data.customization.moq;
+          if (data.customization.plate_fee_policy) document.getElementById('plate_fee_policy').value = data.customization.plate_fee_policy;
+        }
+        if (data.logistics) {
+          if (data.logistics.target_regions) document.getElementById('target_regions').value = data.logistics.target_regions;
+          if (data.logistics.additional_notes) document.getElementById('additional_notes').value = data.logistics.additional_notes;
+        }
+      } catch (e) {
+        console.warn('Failed restoring from storage', e);
+      }
+    }
+
+    function loadCompanyDefaults() {
+      document.getElementById('business_name').value = "Naito De Saint Enterprise";
+      document.getElementById('trading_name').value = "Desaint Stationeries";
+      document.getElementById('ceo_name').value = "Mr. Aseim Solomon";
+      document.getElementById('head_office').value = "Sunyani, Bono Region, Ghana";
+      document.getElementById('phone_1').value = "+233 20 015 2394";
+      document.getElementById('phone_2').value = "+233 24 606 5822";
+      document.getElementById('email').value = "Naitodesaint35@gmail.com";
+      document.getElementById('brand_slogan').value = "Quality You See and Trust. | Write. Create. Inspire.";
+      document.getElementById('target_regions').value = "Bono, Bono East, Ahafo, Ashanti, Central, Western North";
+      saveToStorage();
+      alert('Company deck information populated successfully!');
+    }
+
+    function resetForm() {
+      if (confirm('Are you sure you want to reset all answers to default?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    function renderSummaryTable() {
+      const data = getFormData();
+      const table = document.getElementById('summary-table-view');
+      table.innerHTML = `
+        <tr><th>Registered Enterprise</th><td>${data.corporate.business_name} (${data.corporate.trading_name})</td></tr>
+        <tr><th>Founder & CEO</th><td>${data.corporate.ceo_name}</td></tr>
+        <tr><th>Location & Contact</th><td>${data.corporate.head_office} | ${data.corporate.phone_1} / ${data.corporate.phone_2}</td></tr>
+        <tr><th>Active Channels</th><td>
+          ${data.channels.b2c_retail ? '• Retail Storefront ' : ''}
+          ${data.channels.b2b_wholesale ? '• Wholesale B2B ' : ''}
+          ${data.channels.institutional_school ? '• School Supply ' : ''}
+          ${data.channels.pos_counter ? '• Walk-in POS' : ''}
+        </td></tr>
+        <tr><th>Stock Display Policy</th><td>${data.channels.stock_display_policy === 'badge_only' ? 'Status Badges Only (Safe for wholesale)' : 'Exact Stock Numbers'}</td></tr>
+        <tr><th>School Customization</th><td>${data.customization.workflow === 'interactive_customizer' ? 'Online Customizer with Crest Upload' : 'RFQ Form'} (MOQ: ${data.customization.moq})</td></tr>
+        <tr><th>GRA Tax Scheme</th><td>${data.financials.gra_tax_scheme.toUpperCase()} (WHT Auto-Deduction: ${data.financials.wht_enabled ? 'Enabled' : 'Disabled'})</td></tr>
+        <tr><th>Payment Rails</th><td>
+          ${data.financials.payments.momo_automated ? '• Automated MoMo ' : ''}
+          ${data.financials.payments.momo_manual ? '• Manual MoMo ' : ''}
+          ${data.financials.payments.bank_transfer ? '• Bank Transfer ' : ''}
+          ${data.financials.payments.cash_on_delivery ? '• Cash/Pickup' : ''}
+        </td></tr>
+        <tr><th>Logistics Hub</th><td>Sunyani Hub &rarr; ${data.logistics.target_regions}</td></tr>
+        <tr><th>Fulfillment Modes</th><td>
+          ${data.logistics.bus_terminal_dispatch ? '• VIP/OA Bus Terminal ' : ''}
+          ${data.logistics.institutional_truck ? '• School Truck Delivery ' : ''}
+          ${data.logistics.in_store_pickup ? '• Store Pickup ' : ''}
+          ${data.logistics.local_city_courier ? '• City Rider' : ''}
+        </td></tr>
+      `;
+    }
+
+    function exportJSON() {
+      const data = getFormData();
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Desaint_Stationeries_Requirements_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Auto load on init
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      // Setup auto-save listener on inputs
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('change', saveToStorage);
+        el.addEventListener('input', saveToStorage);
+      });
+    });
+  </script>
+</body>
+</html>

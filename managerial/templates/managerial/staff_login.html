@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login — {{ BRAND_NAME }} Management Portal</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpeg' %}">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Offline Bootstrap 5 CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS & Theme -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/theme.css' %}" rel="stylesheet">
+    <!-- Theme Toggle (early) -->
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+</head>
+<body>
+
+{% include 'includes/aura_theme_gradients.html' %}
+
+<div class="aura-content d-flex align-items-center justify-content-center position-relative" style="min-height: 100vh; padding: 2rem 1rem;">
+    <div style="position: absolute; top: 1.25rem; right: 1.25rem; z-index: 10;">
+        {% include 'includes/theme_toggle_button.html' %}
+    </div>
+    <div class="w-100" style="max-width: 440px;">
+
+        <!-- Brand Card -->
+        <div class="text-center mb-4">
+            <div class="d-inline-block p-2 bg-white rounded-3 shadow mb-3" style="border: 2px solid rgba(11,37,69,0.15);">
+                <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" style="height: 60px; width: auto; object-fit: contain; display: block;">
+            </div>
+            <h4 class="fw-bold font-mono mb-0" style="color: var(--cv-primary, #0B2545);">{{ BRAND_NAME|upper }}</h4>
+            <p class="text-muted small font-mono mb-0">{{ COMPANY_NAME }}</p>
+            <p class="text-muted small">Management Portal — Staff Access</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="cv-card p-4 shadow-sm">
+            <h5 class="fw-bold mb-1 text-center">
+                <i class="fas fa-shield-halved me-2 text-primary"></i>Staff Sign-In
+            </h5>
+            <p class="text-muted small text-center mb-3">Enter your staff credentials to access the portal.</p>
+
+            {% if request.user.is_authenticated %}
+            <div class="alert alert-info d-flex align-items-center justify-content-between p-2 mb-3" style="font-size: 0.8rem;">
+                <div>
+                    <i class="fas fa-user-circle me-1"></i>
+                    Signed in as <strong>{{ request.user.username }}</strong>
+                    <span class="badge bg-primary font-mono ms-1">{{ user_role }}</span>
+                </div>
+                <div class="d-flex gap-1">
+                    <a href="{% url 'managerial:dashboard' %}" class="btn btn-sm btn-primary py-0 px-2 font-mono" style="font-size: 0.72rem;">Portal</a>
+                    <form method="post" action="{% url 'managerial:staff_logout' %}" class="d-inline mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2 font-mono" style="font-size: 0.72rem;">Sign Out</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="alert alert-danger d-flex align-items-start gap-2 mb-3" role="alert" style="font-size: 0.875rem;">
+                <i class="fas fa-triangle-exclamation mt-1 flex-shrink-0"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'managerial:staff_login' %}" autocomplete="off">
+                {% csrf_token %}
+                {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label fw-medium" style="font-size: 0.875rem;">
+                        <i class="fas fa-user me-1 text-muted"></i> Username
+                    </label>
+                    <input type="text" id="id_username" name="username"
+                           class="form-control font-mono" placeholder="staff.username"
+                           autocomplete="username" autofocus required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_password" class="form-label fw-medium" style="font-size: 0.875rem;">
+                        <i class="fas fa-lock me-1 text-muted"></i> Password
+                    </label>
+                    <div class="input-group">
+                        <input type="password" id="id_password" name="password"
+                               class="form-control font-mono" placeholder="••••••••"
+                               autocomplete="current-password" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1" title="Show / hide password">
+                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold font-mono py-2">
+                    <i class="fas fa-right-to-bracket me-2"></i> Sign In to Portal
+                </button>
+            </form>
+        </div>
+
+        <!-- Role Description -->
+        <div class="mt-4">
+            <p class="text-muted text-center small mb-2 font-mono">Staff Roles at Desaint Stationeries</p>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="cv-card p-2 text-center" style="font-size: 0.75rem;">
+                        <i class="fas fa-chart-pie text-primary mb-1 d-block"></i>
+                        <span class="fw-semibold font-mono">CEO</span>
+                        <br><span class="text-muted">Full access</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="cv-card p-2 text-center" style="font-size: 0.75rem;">
+                        <i class="fas fa-cash-register text-success mb-1 d-block"></i>
+                        <span class="fw-semibold font-mono">Cashier</span>
+                        <br><span class="text-muted">POS Terminal</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="cv-card p-2 text-center" style="font-size: 0.75rem;">
+                        <i class="fas fa-book-open text-warning mb-1 d-block"></i>
+                        <span class="fw-semibold font-mono">Graphics</span>
+                        <br><span class="text-muted">Book Customizer</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="cv-card p-2 text-center" style="font-size: 0.75rem;">
+                        <i class="fas fa-truck-fast text-info mb-1 d-block"></i>
+                        <span class="fw-semibold font-mono">Logistics</span>
+                        <br><span class="text-muted">Waybill Tracker</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Store link -->
+        <div class="text-center mt-4">
+            <a href="{% url 'core:home' %}" class="text-muted small text-decoration-none font-mono">
+                <i class="fas fa-arrow-left me-1"></i> Back to Customer Store
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Offline Bootstrap 5 JS -->
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+    // Password show/hide toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('id_password');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleIcon.classList.toggle('fa-eye', !isPassword);
+            toggleIcon.classList.toggle('fa-eye-slash', isPassword);
+        });
+    }
+</script>
+</body>
+</html>

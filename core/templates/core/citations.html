@@ -1,0 +1,245 @@
+{% extends "base_storefront.html" %}
+{% load static %}
+
+{% block title %}Citations, Accreditations & Quality Standards — {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<!-- CITATIONS HERO -->
+<div class="mb-4" style="background: linear-gradient(135deg, #0B2545 0%, #153e70 60%, #1e293b 100%); border-radius: var(--radius-md); padding: 3rem 2rem; color: #ffffff;">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-2 font-mono">
+                <i class="fas fa-certificate"></i> Verified Corporate Credentials
+            </span>
+            <h1 class="h1 fw-bold text-white mb-2" style="letter-spacing: -0.5px;">
+                Corporate Citations & Quality Standards
+            </h1>
+            <p class="fs-5 text-light opacity-90 font-mono mb-3">
+                Naito De Saint Enterprise &bull; Quality You See and Trust
+            </p>
+            <p class="text-light opacity-90 mb-4" style="max-width: 660px; line-height: 1.7;">
+                Our formal registration, statutory GRA tax credentials under <strong>Act 896</strong>, digital proofing sign-off protocol, and manufacturing benchmarks ensuring educational excellence across Ghana.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'customizer:configurator' %}" class="btn btn-warning text-dark fw-bold px-4 py-2 font-mono">
+                    <i class="fas fa-book-open me-1"></i> Launch Customizer
+                </a>
+                <a href="tel:{{ PHONE_PRIMARY }}" class="btn btn-outline-light px-4 py-2 font-mono">
+                    <i class="fas fa-phone me-1"></i> Speak to Executive Office
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 text-center d-none d-lg-block">
+            <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 shadow-sm">
+                <i class="fas fa-shield-halved fa-4x text-warning mb-3"></i>
+                <h5 class="fw-bold text-white font-mono mb-1">Act 896 Compliant</h5>
+                <p class="small text-light opacity-75 font-mono mb-0">3% WHT Institutional Proformas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4 PRIMARY CITATIONS & COMPLIANCE CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100 border-start border-4 border-primary">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-landmark fa-2x"></i>
+                </div>
+                <div>
+                    <span class="badge bg-primary-subtle text-primary font-mono small">Legal Entity</span>
+                    <h5 class="fw-bold text-dark m-0">Registered Enterprise Entity</h5>
+                </div>
+            </div>
+            <p class="text-muted small mb-3" style="line-height: 1.7;">
+                <strong>Naito De Saint Enterprise</strong> is legally incorporated under the commercial registration framework of the Republic of Ghana, with principal operational headquarters based in Sunyani, Bono Region.
+            </p>
+            <ul class="list-unstyled small font-mono text-muted mb-0">
+                <li><i class="fas fa-check text-success me-2"></i>Official Trade Name: <strong>Desaint Stationeries</strong></li>
+                <li><i class="fas fa-check text-success me-2"></i>Incorporation Hub: Sunyani Municipal, Bono Region</li>
+                <li><i class="fas fa-check text-success me-2"></i>Executive Managing Director: <strong>Mr. Aseim Solomon</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100 border-start border-4 border-danger">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-file-shield fa-2x"></i>
+                </div>
+                <div>
+                    <span class="badge bg-danger-subtle text-danger font-mono small">Tax Governance</span>
+                    <h5 class="fw-bold text-dark m-0">GRA Institutional Procurement (Act 896)</h5>
+                </div>
+            </div>
+            <p class="text-muted small mb-3" style="line-height: 1.7;">
+                Fully structured to support government procurement, municipal assemblies, educational directorates, and private institutional buyers under the <strong>Ghana Income Tax Act, 2015 (Act 896)</strong>.
+            </p>
+            <ul class="list-unstyled small font-mono text-muted mb-0">
+                <li><i class="fas fa-check text-success me-2"></i>Official <strong>3% Withholding Tax (WHT)</strong> line-item deduction</li>
+                <li><i class="fas fa-check text-success me-2"></i>Formal proforma invoice references for institutional approval</li>
+                <li><i class="fas fa-check text-success me-2"></i>Compliant for public and private school supply tenders</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100 border-start border-4 border-success">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-success bg-opacity-10 text-success p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-file-signature fa-2x"></i>
+                </div>
+                <div>
+                    <span class="badge bg-success-subtle text-success font-mono small">Quality Assurance</span>
+                    <h5 class="fw-bold text-dark m-0">Zero-Misprint Proofing Sign-off</h5>
+                </div>
+            </div>
+            <p class="text-muted small mb-3" style="line-height: 1.7;">
+                To safeguard school budgets, we enforce a mandatory digital proof sign-off protocol. No custom exercise book is sent to the printing plates until the school head or representative inspects and approves the cover artwork.
+            </p>
+            <ul class="list-unstyled small font-mono text-muted mb-0">
+                <li><i class="fas fa-check text-success me-2"></i>High-resolution front/back cover digital proofs</li>
+                <li><i class="fas fa-check text-success me-2"></i>Verification of school crest, anthem, rules, and colors</li>
+                <li><i class="fas fa-check text-success me-2"></i>Legally binding proof sign-off record</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="cv-card p-4 h-100 border-start border-4 border-info">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-3 bg-info bg-opacity-10 text-info p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-truck-fast fa-2x"></i>
+                </div>
+                <div>
+                    <span class="badge bg-info-subtle text-info font-mono small">Regional Reach</span>
+                    <h5 class="fw-bold text-dark m-0">Inter-Regional Distribution Network</h5>
+                </div>
+            </div>
+            <p class="text-muted small mb-3" style="line-height: 1.7;">
+                Direct parcel delivery logistics operating out of Sunyani hub with direct bus terminal agreements for fast dispatch across 8 regions in Ghana.
+            </p>
+            <ul class="list-unstyled small font-mono text-muted mb-0">
+                <li><i class="fas fa-check text-success me-2"></i>VIP Jeoun, OA Travel, Imperial Express, Metro Mass</li>
+                <li><i class="fas fa-check text-success me-2"></i>Coverage: Bono, Bono East, Ahafo, Ashanti, Northern, Western North</li>
+                <li><i class="fas fa-check text-success me-2"></i>SMS dispatch notifications with driver & conductor contacts</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- TECHNICAL MANUFACTURING SPECIFICATIONS -->
+<div class="cv-card p-4 p-md-5 mb-5">
+    <div class="text-center mb-4">
+        <span class="badge bg-danger font-mono text-uppercase">Production Benchmarks</span>
+        <h3 class="fw-bold mt-2" style="color: var(--cv-primary);">Technical Manufacturing Specifications</h3>
+        <p class="text-muted small mx-auto" style="max-width: 620px;">
+            Every ream, exercise book, and stationery carton manufactured or supplied by Desaint Stationeries meets strict educational endurance standards.
+        </p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle font-mono small">
+            <thead class="table-light">
+                <tr>
+                    <th>Component</th>
+                    <th>Our Production Standard</th>
+                    <th>Commercial Value to Schools</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold text-dark">Inner Sheet Paper</td>
+                    <td>70gsm to 80gsm pure wood-free virgin bond paper</td>
+                    <td>Zero ink bleed-through with fountain pens, biros, and markers.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Cover Stock</td>
+                    <td>250gsm – 300gsm heavy duplex card with water-resistant lamination</td>
+                    <td>Withstands classroom daily wear, rough transport, and humidity.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Ruling Accuracy</td>
+                    <td>Calibrated double-line, single-line, quad, and grid lines</td>
+                    <td>Precise alignment aiding student handwriting and presentation.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Binding Integrity</td>
+                    <td>Industrial heavy-gauge wire staples & Smyth-sewn book sections</td>
+                    <td>Pages remain firmly intact throughout the academic term.</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Minimum Order Quantity (MOQ)</td>
+                    <td>5,000 – 10,000 copies per institutional custom order</td>
+                    <td>Factory-level volume pricing with free printing plate setup.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- INSTITUTIONAL TESTIMONIALS & REFERENCES -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="cv-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="text-warning mb-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="text-muted small fst-italic mb-3">
+                    "Desaint delivered 8,500 custom exercise books for our Senior High School with our exact crest and school anthem on the back cover. The 80gsm paper quality exceeded our expectations."
+                </p>
+            </div>
+            <div class="pt-3 border-top font-mono small">
+                <strong class="text-dark d-block">St. James Seminary SHS</strong>
+                <span class="text-muted">Sunyani, Bono Region</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="cv-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="text-warning mb-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="text-muted small fst-italic mb-3">
+                    "The digital proofing approval protected us from printing errors, and their GRA 3% WHT invoices made our audit processing completely hassle-free."
+                </p>
+            </div>
+            <div class="pt-3 border-top font-mono small">
+                <strong class="text-dark d-block">Ridge Experimental Basic</strong>
+                <span class="text-muted">Sunyani Central</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="cv-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="text-warning mb-2">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="text-muted small fst-italic mb-3">
+                    "Fast bus parcel dispatch via VIP Jeoun to Kumasi. Our wholesale cartons arrived intact within 24 hours of dispatch from the Sunyani hub."
+                </p>
+            </div>
+            <div class="pt-3 border-top font-mono small">
+                <strong class="text-dark d-block">Agyeiwaa Commercial Bookshop</strong>
+                <span class="text-muted">Berekum & Kumasi</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="p-4 rounded-4 text-center font-mono" style="background: var(--cv-card-bg); border: 2px dashed var(--cv-accent);">
+    <h4 class="fw-bold mb-2" style="color: var(--cv-primary);">Request Formal Citations & Tender Profile</h4>
+    <p class="text-muted small mb-3">We provide official company profiles, GRA compliance certificates, and physical paper samples for institutional board meetings.</p>
+    <a href="{% url 'core:contact' %}" class="btn btn-danger px-4 py-2 fw-bold">
+        <i class="fas fa-file-pdf me-1"></i> Inquire Corporate Dossier
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block title %}Database Backup & Data Hub — {{ BRAND_NAME }}{% endblock %}
+{% block page_title %}Database Backups & Disaster Recovery{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--cv-primary);">
+            <i class="fas fa-database text-primary me-2"></i>Database Backups & Disaster Recovery Hub
+        </h4>
+        <p class="text-muted small mb-0">Generate instant JSON snapshots, download SQLite binary backups, export spreadsheet CSVs, or restore system state.</p>
+    </div>
+    <div>
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 font-mono">
+            <i class="fas fa-shield-halved me-1"></i> CEO Restricted Access
+        </span>
+    </div>
+</div>
+
+<!-- Database Live Snapshot Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Products & Catalog</span>
+                    <h3 class="font-mono fw-bold text-dark my-1">{{ stats.products_count }}</h3>
+                    <small class="text-muted font-mono" style="font-size: 0.75rem;">Across {{ stats.categories_count }} categories</small>
+                </div>
+                <i class="fas fa-boxes-stacked fa-2x text-primary opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Custom Book Orders</span>
+                    <h3 class="font-mono fw-bold text-warning my-1">{{ stats.custom_orders_count }}</h3>
+                    <small class="text-muted font-mono" style="font-size: 0.75rem;">5k–10k school runs</small>
+                </div>
+                <i class="fas fa-book-open fa-2x text-warning opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Counter POS Sales</span>
+                    <h3 class="font-mono fw-bold text-success my-1">{{ stats.pos_sales_count }}</h3>
+                    <small class="text-muted font-mono" style="font-size: 0.75rem;">Sunyani walk-in receipts</small>
+                </div>
+                <i class="fas fa-cash-register fa-2x text-success opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Database Engine</span>
+                    <h3 class="font-mono fw-bold text-info my-1">{{ stats.db_engine|upper }}</h3>
+                    <small class="text-muted font-mono" style="font-size: 0.75rem;">Size: {{ stats.db_size_mb }} MB</small>
+                </div>
+                <i class="fas fa-hard-drive fa-2x text-info opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 1: ONE-CLICK COMPLETE SYSTEM BACKUPS -->
+<div class="cv-card p-4 mb-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--cv-primary);">
+                <i class="fas fa-cloud-arrow-down text-primary me-2"></i>One-Click System Backups
+            </h5>
+            <p class="text-muted small mb-0">Full snapshot of all operational data: credit records, custom orders, invoices, POS transactions, products, and users.</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- JSON Dump Backup Card -->
+        <div class="col-md-6">
+            <div class="p-4 rounded-3 border h-100 d-flex flex-column justify-content-between" style="background: #f8fafc;">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary font-mono">JSON Dump</span>
+                        <h6 class="fw-bold mb-0 text-dark">Full Database JSON Archive</h6>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Exports all models into standard Django fixture format. Perfect for version control, migration, or restoring on a different server.
+                    </p>
+                </div>
+                <a href="{% url 'managerial:export_database_json' %}" class="btn btn-primary font-mono fw-bold">
+                    <i class="fas fa-download me-1"></i> Download JSON Backup (.json)
+                </a>
+            </div>
+        </div>
+
+        <!-- SQLite Binary Backup Card -->
+        <div class="col-md-6">
+            <div class="p-4 rounded-3 border h-100 d-flex flex-column justify-content-between" style="background: #f8fafc;">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-success font-mono">SQLite Snapshot</span>
+                        <h6 class="fw-bold mb-0 text-dark">Raw Database File Snapshot</h6>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Direct binary copy of the active database file ({{ stats.db_size_mb }} MB). Can be immediately opened with SQLite browser or used as an offline backup.
+                    </p>
+                </div>
+                <a href="{% url 'managerial:download_sqlite_backup' %}" class="btn btn-outline-success font-mono fw-bold">
+                    <i class="fas fa-database me-1"></i> Download SQLite File (.sqlite3)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: INDIVIDUAL SPREADSHEET CSV EXPORTS -->
+<div class="cv-card p-4 mb-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--cv-primary);">
+                <i class="fas fa-file-csv text-success me-2"></i>Operational Spreadsheet Exports (CSV)
+            </h5>
+            <p class="text-muted small mb-0">Download single-table spreadsheets compatible with Microsoft Excel, Google Sheets, and accounting software.</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="p-3 rounded border text-center h-100 d-flex flex-column justify-content-between bg-light">
+                <i class="fas fa-file-invoice-dollar fa-2x text-danger mb-2"></i>
+                <h6 class="fw-bold text-dark font-mono mb-1" style="font-size: 0.85rem;">School Credit Ledger</h6>
+                <small class="text-muted mb-3 d-block">{{ stats.credit_records_count }} school records</small>
+                <a href="{% url 'managerial:export_csv' 'credit-ledger' %}" class="btn btn-sm btn-outline-danger font-mono w-100">
+                    <i class="fas fa-file-excel me-1"></i> Export CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="p-3 rounded border text-center h-100 d-flex flex-column justify-content-between bg-light">
+                <i class="fas fa-truck-fast fa-2x text-info mb-2"></i>
+                <h6 class="fw-bold text-dark font-mono mb-1" style="font-size: 0.85rem;">Bus Waybill Manifests</h6>
+                <small class="text-muted mb-3 d-block">{{ stats.waybills_count }} dispatch records</small>
+                <a href="{% url 'managerial:export_csv' 'waybills' %}" class="btn btn-sm btn-outline-info text-dark font-mono w-100">
+                    <i class="fas fa-file-excel me-1"></i> Export CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="p-3 rounded border text-center h-100 d-flex flex-column justify-content-between bg-light">
+                <i class="fas fa-cash-register fa-2x text-success mb-2"></i>
+                <h6 class="fw-bold text-dark font-mono mb-1" style="font-size: 0.85rem;">POS Counter Till Log</h6>
+                <small class="text-muted mb-3 d-block">{{ stats.pos_sales_count }} receipts recorded</small>
+                <a href="{% url 'managerial:export_csv' 'pos-sales' %}" class="btn btn-sm btn-outline-success font-mono w-100">
+                    <i class="fas fa-file-excel me-1"></i> Export CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="p-3 rounded border text-center h-100 d-flex flex-column justify-content-between bg-light">
+                <i class="fas fa-boxes-stacked fa-2x text-primary mb-2"></i>
+                <h6 class="fw-bold text-dark font-mono mb-1" style="font-size: 0.85rem;">Product Catalog & Pricing</h6>
+                <small class="text-muted mb-3 d-block">{{ stats.products_count }} stationery items</small>
+                <a href="{% url 'managerial:export_csv' 'products' %}" class="btn btn-sm btn-outline-primary font-mono w-100">
+                    <i class="fas fa-file-excel me-1"></i> Export CSV
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 3: DISASTER RECOVERY RESTORE -->
+<div class="cv-card p-4 shadow-sm border border-warning border-opacity-50">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="fw-bold mb-1 text-dark">
+                <i class="fas fa-cloud-arrow-up text-warning me-2"></i>Disaster Recovery: Restore from Backup
+            </h5>
+            <p class="text-muted small mb-0">Upload a previously generated JSON backup file to restore database records.</p>
+        </div>
+        <span class="badge bg-warning text-dark font-mono">
+            <i class="fas fa-triangle-exclamation me-1"></i> Caution
+        </span>
+    </div>
+
+    <div class="alert alert-warning small font-mono mb-3" role="alert">
+        <i class="fas fa-info-circle me-1"></i> Restoring a backup will update existing records matching primary keys. Always download a fresh backup before performing a restore.
+    </div>
+
+    <form method="post" action="{% url 'managerial:restore_database_json' %}" enctype="multipart/form-data" class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+        {% csrf_token %}
+        <input type="file" name="backup_file" accept=".json" class="form-control font-mono" required>
+        <button type="submit" class="btn btn-warning text-dark fw-bold font-mono text-nowrap" onclick="return confirm('Are you sure you want to restore the database from this file?');">
+            <i class="fas fa-upload me-1"></i> Restore Database
+        </button>
+    </form>
+</div>
+{% endblock %}

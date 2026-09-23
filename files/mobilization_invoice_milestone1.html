@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobilization Invoice #SIKA-INV-2026-001-M1 — Desaint Stationeries</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0B2545;
+            --navy-dark: #07162c;
+            --crimson: #D90429;
+            --slate-600: #475569;
+            --slate-800: #1e293b;
+            --slate-100: #f1f5f9;
+            --gold: #d97706;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: var(--slate-800);
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .invoice-card {
+            max-width: 860px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .header-band {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
+            color: #ffffff;
+            padding: 40px;
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .brand-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-badge {
+            background: var(--crimson);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .invoice-stamp {
+            text-align: right;
+        }
+
+        .invoice-type {
+            font-size: 14px;
+            font-weight: 700;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .invoice-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-top: 6px;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            padding: 32px 40px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .meta-box h4 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--slate-600);
+            margin-bottom: 8px;
+        }
+
+        .meta-box p {
+            font-size: 14px;
+            color: var(--slate-800);
+            line-height: 1.6;
+        }
+
+        .meta-box .highlight {
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        .table-section {
+            padding: 32px 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--slate-600);
+            background: var(--slate-100);
+            border-bottom: 2px solid var(--border);
+        }
+
+        thead th.text-right {
+            text-align: right;
+        }
+
+        tbody td {
+            padding: 18px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tbody td.text-right {
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .item-desc {
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .item-subtext {
+            font-size: 13px;
+            color: var(--slate-600);
+            line-height: 1.5;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            padding: 0 40px 32px 40px;
+        }
+
+        .payment-instructions {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .payment-instructions h4 {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--navy);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .payment-row {
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .payment-row span:first-child {
+            color: var(--slate-600);
+        }
+
+        .payment-row span:last-child {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--navy);
+        }
+
+        .total-box {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .total-line.final {
+            border-top: 2px solid #cbd5e1;
+            padding-top: 12px;
+            margin-top: 4px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--crimson);
+        }
+
+        .total-line.final span:last-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+        }
+
+        .footer-note {
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            padding: 24px 40px;
+            font-size: 12px;
+            color: var(--slate-600);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .print-btn {
+            background: var(--navy);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .print-btn:hover {
+            background: var(--navy-dark);
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .invoice-card {
+                border: none;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="max-width: 860px; margin: 0 auto; text-align: right;" class="no-print">
+        <button class="print-btn" onclick="window.print()">
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <div class="invoice-card">
+        <!-- HEADER BAND -->
+        <div class="header-band">
+            <div class="header-top">
+                <div>
+                    <div class="brand-title">
+                        SikaDev Software Engineering
+                        <span class="brand-badge">Enterprise</span>
+                    </div>
+                    <div class="brand-subtitle">
+                        Digital Platforms &middot; Supply Chain Systems &middot; Cloud Architecture
+                    </div>
+                </div>
+                <div class="invoice-stamp">
+                    <div class="invoice-type">Mobilization Proforma</div>
+                    <div class="invoice-number">SIKA-DSP-2026-M1</div>
+                    <div><span class="status-badge">Payment Due &middot; Mobilization</span></div>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: #94a3b8; display: flex; gap: 24px;">
+                <span><strong>Date:</strong> September 21, 2026</span>
+                <span><strong>Due Date:</strong> Immediate upon Kickoff</span>
+                <span><strong>Proposal Ref:</strong> SIKA-DSP-2026-001</span>
+            </div>
+        </div>
+
+        <!-- CLIENT & SENDER DETAILS -->
+        <div class="client-grid">
+            <div class="meta-box">
+                <h4>Billed To:</h4>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                    <img src="../static/img/logo.jpeg" alt="NDS Logo" style="height: 48px; width: 48px; object-fit: contain; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; padding: 2px;">
+                    <div>
+                        <p class="highlight" style="margin: 0;">Naito De Saint Enterprise</p>
+                        <small style="color: var(--slate-600); font-weight: 600;">Desaint Stationeries &bull; Sunyani</small>
+                    </div>
+                </div>
+                <p><strong>Attention:</strong> Mr. Aseim Solomon, Founder & CEO</p>
+                <p>Sunyani, Bono Region, Ghana</p>
+                <p>Phone: +233 20 015 2394 / +233 24 606 5822</p>
+                <p>Email: Naitodesaint35@gmail.com</p>
+            </div>
+            <div class="meta-box">
+                <h4>Issued By:</h4>
+                <p class="highlight">SikaDev Software Engineering Team</p>
+                <p>In partnership with Cotakyi Ventures Network</p>
+                <p>Accra & Kumasi Hubs, Ghana</p>
+                <p>Technical Lead: Lead Project Director</p>
+                <p>Tier: Premier Founding Enterprise Partner (Bono)</p>
+            </div>
+        </div>
+
+        <!-- LINE ITEMS -->
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">#</th>
+                        <th style="width: 52%;">Description of Deliverables</th>
+                        <th style="width: 15%;">Allocation</th>
+                        <th style="width: 25%;" class="text-right">Amount (GH₵)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mono">01</td>
+                        <td>
+                            <div class="item-desc">Milestone 1: Project Mobilization & Foundation (50%)</div>
+                            <div class="item-subtext">
+                                Formal kickoff of the Desaint Stationeries Digital Platform:
+                                <ul style="margin: 6px 0 0 16px; font-size: 12px; color: var(--slate-600);">
+                                    <li>Registration and DNS acquisition of <strong>desaintstationeries.com</strong></li>
+                                    <li>Configuration of corporate email accounts (sales@, info@, ceo@)</li>
+                                    <li>Provisioning of isolated cloud environment & PostgreSQL database</li>
+                                    <li>Initialization of Django 5 core architecture, offline assets, & brand layout</li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td>50% Deposit</td>
+                        <td class="text-right">2,500.00</td>
+                    </tr>
+                    <tr>
+                        <td class="mono">02</td>
+                        <td>
+                            <div class="item-desc">Founding Enterprise Partner Cloud Subsidy</div>
+                            <div class="item-subtext">
+                                Year 1 High-Speed Cloud Server, SSL Encryption & Domain registration fee absorbed by SikaDev as premier regional partner.
+                            </div>
+                        </td>
+                        <td>100% Absorbed</td>
+                        <td class="text-right" style="color: #16a34a;">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAYMENT & TOTALS -->
+        <div class="summary-grid">
+            <div class="payment-instructions">
+                <h4>Mobilization Payment Instructions</h4>
+                <div class="payment-row">
+                    <span>Payment Channel:</span>
+                    <span>MTN Mobile Money / Bank</span>
+                </div>
+                <div class="payment-row">
+                    <span>MoMo Account Name:</span>
+                    <span>SikaDev Software / Lead</span>
+                </div>
+                <div class="payment-row">
+                    <span>MoMo Number:</span>
+                    <span>024 XXX XXXX</span>
+                </div>
+                <div class="payment-row">
+                    <span>Bank Name:</span>
+                    <span>GCB Bank Ghana</span>
+                </div>
+                <div class="payment-row">
+                    <span>Payment Reference:</span>
+                    <span>DESAINT-M1</span>
+                </div>
+                <p style="font-size: 11px; color: var(--slate-600); margin-top: 10px;">
+                    * Kindly share the transaction screenshot or reference ID via WhatsApp/Email upon transfer to trigger immediate domain acquisition.
+                </p>
+            </div>
+
+            <div class="total-box">
+                <div class="total-line">
+                    <span>Agreed Project Total:</span>
+                    <span class="mono">GH₵ 5,000.00</span>
+                </div>
+                <div class="total-line">
+                    <span>Milestone 2 Balance (30%):</span>
+                    <span class="mono">GH₵ 1,500.00</span>
+                </div>
+                <div class="total-line">
+                    <span>Milestone 3 Balance (20%):</span>
+                    <span class="mono">GH₵ 1,000.00</span>
+                </div>
+                <div class="total-line final">
+                    <span>Deposit Due Now:</span>
+                    <span>GH₵ 2,500.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-note">
+            <div>
+                <strong>Thank you for choosing SikaDev!</strong> We look forward to powering Desaint Stationeries.
+            </div>
+            <div class="mono" style="font-size: 11px;">
+                Ref: SIKA-DSP-2026-001-M1
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

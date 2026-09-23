@@ -1,0 +1,113 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block title %}Cashier Daily Till Log & Sales History — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}Cashier Daily Till Log &bull; Sunyani Counter{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">Cashier Daily Till & POS Sales History</h4>
+        <small class="text-muted">Real-time audit log of physical cash and MoMo till transactions at the Sunyani counter.</small>
+    </div>
+    <div>
+        <a href="{% url 'orders:pos_terminal' %}" class="btn btn-sm btn-danger font-mono">
+            <i class="fas fa-cash-register me-1"></i> Open POS Terminal
+        </a>
+    </div>
+</div>
+
+<!-- DAILY TOTAL METRIC CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="cv-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono small">Today's Physical Cash in Till</span>
+                    <h3 class="font-mono fw-bold text-success my-1">GH₵ {{ total_cash|floatformat:2 }}</h3>
+                    <small class="text-muted font-mono">Counter Drawer #01</small>
+                </div>
+                <i class="fas fa-money-bill-wave fa-2x text-success opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="cv-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono small">Today's MTN MoMo Till Balance</span>
+                    <h3 class="font-mono fw-bold text-warning my-1">GH₵ {{ total_momo|floatformat:2 }}</h3>
+                    <small class="text-muted font-mono">Merchant: Desaint Stationeries</small>
+                </div>
+                <i class="fas fa-mobile-screen fa-2x text-warning opacity-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="cv-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="text-muted text-uppercase font-mono small">Total Counter Sales Today</span>
+                    <h3 class="font-mono fw-bold text-dark my-1">GH₵ {{ total_today|floatformat:2 }}</h3>
+                    <small class="text-primary fw-bold font-mono">{{ today_sales.count }} transactions logged</small>
+                </div>
+                <i class="fas fa-receipt fa-2x text-primary opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- POS TRANSACTIONS TABLE -->
+<div class="cv-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold m-0" style="color: var(--cv-primary);">Completed Counter Transactions</h5>
+        <span class="badge bg-secondary font-mono">Database Log</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle font-mono small">
+            <thead class="table-light">
+                <tr>
+                    <th>Receipt #</th>
+                    <th>Cashier</th>
+                    <th>Branch</th>
+                    <th>Payment Mode</th>
+                    <th>Amount Tendered</th>
+                    <th>Total Paid</th>
+                    <th>Timestamp</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                    <tr>
+                        <td><strong class="text-primary">{{ sale.receipt_number }}</strong></td>
+                        <td>{{ sale.cashier_name }}</td>
+                        <td>{{ sale.store_branch }}</td>
+                        <td>
+                            <span class="badge {% if sale.payment_mode == 'CASH' %}bg-success{% elif sale.payment_mode == 'MOMO_TILL' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                {{ sale.get_payment_mode_display }}
+                            </span>
+                        </td>
+                        <td>GH₵ {{ sale.amount_tendered|floatformat:2 }}</td>
+                        <td class="fw-bold text-dark fs-6">GH₵ {{ sale.total_amount|floatformat:2 }}</td>
+                        <td class="text-muted">{{ sale.created_at|date:"M d, Y - h:i A" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'orders:pos_receipt' sale.pk %}" target="_blank" class="btn btn-sm btn-outline-primary font-mono" style="font-size: 0.75rem;">
+                                <i class="fas fa-print me-1"></i> Print Receipt
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No POS counter sales logged yet today.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

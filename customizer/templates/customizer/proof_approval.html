@@ -1,0 +1,165 @@
+{% extends base_template|default:"base_admin.html" %}
+{% load static %}
+
+{% block title %}Digital Artwork Proof Sign-off — {{ order.school_name }}{% endblock %}
+
+{% block page_title %}Digital Proofing Portal &bull; Order {{ order.order_ref }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">Digital Artwork Proof & Contract Sign-off</h4>
+        <small class="text-muted">
+            Order Reference: <span class="font-mono text-danger fw-bold">{{ order.order_ref }}</span> &bull; Client: {{ order.school_name }}
+        </small>
+    </div>
+    <div>
+        <a href="{% url 'customizer:configurator' %}" class="btn btn-sm btn-outline-secondary font-mono">
+            <i class="fas fa-arrow-left me-1"></i> Back to Configurator
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT: ARTWORK PROOF PREVIEW -->
+    <div class="col-lg-6">
+        <div class="cv-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold m-0" style="color: var(--cv-primary);">1. Cover Artwork Inspection</h5>
+                <span class="badge bg-info text-dark font-mono">Proof Version 1.0</span>
+            </div>
+
+            <!-- Proof Canvas Simulation -->
+            <div class="p-4 rounded border text-center" style="background: #0B2545; color: #fff; min-height: 380px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                <div class="text-center pt-2">
+                    <small class="text-uppercase font-mono text-light opacity-75" style="letter-spacing: 2px;">Official Custom Exercise Book</small>
+                    <h3 class="fw-bold mt-2 text-warning font-mono" style="letter-spacing: 1px;">
+                        {{ order.school_name|upper }}
+                    </h3>
+                    <p class="fst-italic small text-light opacity-75">Sunyani, Bono Region &bull; Ghana</p>
+                </div>
+
+                <div class="my-auto py-4">
+                    <div style="width: 125px; height: 125px; margin: 0 auto; background: #ffffff; border: 3px solid #D90429; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); overflow: hidden;">
+                        {% if order.school_crest %}
+                            <img src="{{ order.school_crest.url }}" alt="{{ order.school_name }} Crest" style="width: 100%; height: 100%; object-fit: contain;">
+                        {% else %}
+                            <img src="{% static 'img/logo.jpeg' %}" alt="NDS Official Crest" style="width: 100%; height: 100%; object-fit: contain;">
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-danger mt-3 font-mono">VERIFIED VECTOR ARTWORK &bull; NDS</span>
+                </div>
+
+                <div class="pt-3 border-top" style="border-color: rgba(255,255,255,0.2) !important;">
+                    <div class="fw-bold text-light font-mono">
+                        {% if order.ruling %}{{ order.ruling.name }}{% else %}{{ order.book_type }}{% endif %}
+                    </div>
+                    <small class="text-light opacity-75 font-mono">Quantity: {{ order.quantity }} Copies</small>
+                </div>
+            </div>
+
+            <div class="alert alert-secondary mt-3 mb-0 small">
+                <i class="fas fa-info-circle me-1"></i> <strong>Back Cover Content:</strong> {{ order.back_cover_content }}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: FORMAL SIGN-OFF & TERMS -->
+    <div class="col-lg-6">
+        <div class="cv-card p-4">
+            <h5 class="fw-bold mb-3" style="color: var(--cv-primary);">2. Order Specifications & Financials</h5>
+
+            <table class="table table-sm table-bordered font-mono small mb-4">
+                <tbody>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary" style="width: 40%;">School / Client:</td>
+                        <td class="fw-bold">{{ order.school_name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Authorized Representative:</td>
+                        <td>{{ order.proprietor_name }} ({{ order.contact_phone }})</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Book Specification:</td>
+                        <td>{% if order.ruling %}{{ order.ruling.name }}{% else %}{{ order.book_type }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Order Quantity:</td>
+                        <td class="fw-bold text-primary">{{ order.quantity }} Copies</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Gross Amount:</td>
+                        <td>GH₵ {{ gross_formatted }}</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-danger">Less 3% GRA WHT (Act 896):</td>
+                        <td class="text-danger">- GH₵ {{ wht_formatted }}</td>
+                    </tr>
+                    <tr class="table-primary">
+                        <td class="fw-bold text-dark">Net Payable by School:</td>
+                        <td class="fw-bold text-success fs-6">GH₵ {{ net_formatted }}</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Delivery Destination:</td>
+                        <td>{{ order.delivery_location }}</td>
+                    </tr>
+                    <tr>
+                        <td class="bg-light fw-bold text-secondary">Production Status:</td>
+                        <td>
+                            <span class="badge {% if order.digital_proof_approved %}bg-success{% else %}bg-warning text-dark{% endif %} font-mono">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h5 class="fw-bold mb-2" style="color: var(--cv-primary);">3. Legal Digital Sign-Off</h5>
+            <p class="text-muted small">
+                By submitting this digital approval, the institution authorizes <strong>Naito De Saint Enterprise (Desaint Stationeries)</strong> to proceed with lithographic plate casting, printing, folding, and trimming per the specifications shown.
+            </p>
+
+            {% if order.digital_proof_approved %}
+                <div class="alert alert-success small mb-3 border-success">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-certificate text-success fs-3 me-2"></i>
+                        <div>
+                            <strong class="text-success fs-6">Digital Proof Approved & Production Authorized!</strong>
+                            <div class="text-muted small">Certificate Ref: <span class="font-mono fw-bold">SIG-{{ order.order_ref }}</span></div>
+                        </div>
+                    </div>
+                    <div class="border-top pt-2 mt-2 small font-mono">
+                        <div><strong>Signatory:</strong> {{ order.approved_by_signatory }}</div>
+                        <div><strong>Timestamp:</strong> {{ order.approval_timestamp|date:"M d, Y &bull; H:i" }}</div>
+                        <div><strong>Status:</strong> Ready for Offset Litho Plate Making & Paper Slitting</div>
+                    </div>
+                </div>
+            {% else %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Signatory Full Name</label>
+                        <input type="text" name="signatory_name" class="form-control form-control-sm" value="{{ order.proprietor_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Designation / Title</label>
+                        <input type="text" class="form-control form-control-sm" value="Headmaster / Proprietor" required>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="checkApproved" checked required>
+                        <label class="form-check-label small" for="checkApproved">
+                            I have carefully reviewed the school crest, spelling, ruling lines, and back-cover text. I approve this digital proof for immediate factory production.
+                        </label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger py-2 fw-bold font-mono">
+                            <i class="fas fa-signature me-1"></i> Digitally Approve & Authorize Print Run
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

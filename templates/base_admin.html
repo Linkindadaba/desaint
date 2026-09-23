@@ -1,0 +1,331 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ BRAND_NAME }} — Staff Portal{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpeg' %}">
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Offline Bootstrap 5 CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS & Theme -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/theme.css' %}" rel="stylesheet">
+
+    <!-- Theme Toggle JS (Loaded early to prevent flash of wrong theme) -->
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Aura Gradient Background -->
+{% include 'includes/aura_theme_gradients.html' %}
+
+<div class="wrapper aura-content">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+    <nav id="sidebar" class="sidebar">
+
+        <!-- Brand -->
+        <div class="sidebar-brand text-center py-3">
+            <a href="{% url 'managerial:dashboard' %}" class="d-inline-block text-decoration-none">
+                <div class="mb-2 p-1 bg-white rounded-3 shadow-sm d-inline-block" style="border: 2px solid rgba(255,255,255,0.25);">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="{{ BRAND_NAME }}" class="img-fluid rounded" style="max-height: 56px; max-width: 175px; object-fit: contain;">
+                </div>
+                <h6 class="brand-title mb-0 text-white font-mono" style="letter-spacing: 0.5px; font-size: 0.85rem;">{{ COMPANY_NAME|upper }}</h6>
+                <small class="brand-sub font-mono" style="font-size: 0.72rem; color: #cbd5e1;">{{ BRAND_NAME }} &bull; Staff Portal</small>
+            </a>
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="nav flex-column px-3 py-2 flex-grow-1">
+
+            <!-- Dashboard — All authenticated staff -->
+            <li class="nav-item">
+                <a href="{% url 'managerial:dashboard' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.app_name == 'managerial' %}active{% endif %}">
+                    <i class="fas fa-chart-pie fa-fw me-2"></i> Operations Dashboard
+                </a>
+            </li>
+
+            <!-- ─── CEO-Only Sections ──────────────────────────────────── -->
+            {% if is_ceo %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">CEO / Finance</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:analytics' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-line fa-fw me-2 text-primary"></i> Business Graph Analytics
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:credit_ledger' %}"
+                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if request.resolver_match.url_name == 'credit_ledger' %}active{% endif %}">
+                    <span><i class="fas fa-file-invoice-dollar fa-fw me-2 text-danger"></i> School Credit Ledger</span>
+                    {% if overdue_credit_count > 0 %}
+                    <span class="badge bg-danger rounded-pill px-1" style="font-size: 0.65rem;" title="{{ overdue_credit_count }} overdue accounts">
+                        {{ overdue_credit_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'invoices:sample' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'invoices' %}active{% endif %}">
+                    <i class="fas fa-file-lines fa-fw me-2 text-info"></i> GRA Proforma Invoices
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:staff_list' %}"
+                   class="nav-link sidebar-link {% if 'staff' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-users-gear fa-fw me-2 text-warning"></i> Staff & Permissions
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:database_backup' %}"
+                   class="nav-link sidebar-link {% if 'backup' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-database fa-fw me-2 text-success"></i> Database & Backups
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- ─── Cashier / POS Sections ─────────────────────────────── -->
+            {% if is_cashier %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">Counter POS</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'orders:pos_terminal' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.url_name == 'pos_terminal' %}active{% endif %}">
+                    <i class="fas fa-cash-register fa-fw me-2 text-success"></i> POS Terminal (Sunyani)
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'orders:pos_history' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.url_name == 'pos_history' %}active{% endif %}">
+                    <i class="fas fa-receipt fa-fw me-2 text-secondary"></i> Sales History & Till Log
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- ─── Graphics / Customizer Sections ───────────────────────── -->
+            {% if is_graphics %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">School Printing</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'customizer:configurator' %}"
+                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if request.resolver_match.url_name == 'configurator' %}active{% endif %}">
+                    <span><i class="fas fa-book-open fa-fw me-2 text-warning"></i> Book Configurator (5k–10k)</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'customizer:proof_sample' %}"
+                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if 'proof' in request.resolver_match.url_name %}active{% endif %}">
+                    <span><i class="fas fa-file-signature fa-fw me-2 text-warning"></i> Digital Proof Sign-off</span>
+                    {% if pending_proofs_count > 0 %}
+                    <span class="badge bg-warning text-dark rounded-pill px-1" style="font-size: 0.65rem;" title="{{ pending_proofs_count }} awaiting approval">
+                        {{ pending_proofs_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- ─── Logistics / Waybill Sections ─────────────────────────── -->
+            {% if is_logistics %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">Dispatch & Logistics</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'managerial:waybills' %}"
+                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if request.resolver_match.url_name == 'waybills' %}active{% endif %}">
+                    <span><i class="fas fa-truck-fast fa-fw me-2 text-primary"></i> Bus Waybill Tracker</span>
+                    {% if waybills_in_transit_count > 0 %}
+                    <span class="badge bg-primary rounded-pill px-1" style="font-size: 0.65rem;" title="{{ waybills_in_transit_count }} in transit">
+                        {{ waybills_in_transit_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- ─── Raw Django Admin (Superuser Only) ─────────────────────── -->
+            {% if request.user.is_superuser %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">System</small>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/django/" target="_blank" class="nav-link sidebar-link text-secondary">
+                    <i class="fas fa-database fa-fw me-2"></i> Raw Database Admin
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- View Customer Store -->
+            <li class="nav-item mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{% url 'core:home' %}" class="nav-link sidebar-link text-warning">
+                    <i class="fas fa-store fa-fw me-2"></i> View Customer Store
+                </a>
+            </li>
+
+        </ul>
+
+        <!-- Sidebar Footer: User Info + Logout -->
+        <div class="sidebar-footer px-3 py-3 border-top mt-auto">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center overflow-hidden">
+                    <div class="sidebar-avatar me-2 text-primary">
+                        <i class="fas fa-user-shield fa-2x"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="sidebar-username text-truncate fw-semibold text-white" style="font-size: 0.85rem;">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </div>
+                        <small class="text-success font-mono" style="font-size: 0.72rem;">
+                            <i class="fas fa-circle-check me-1"></i>{{ user_role }}
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <form method="post" action="{% url 'managerial:staff_logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-danger p-0" title="Sign Out">
+                            <i class="fas fa-sign-out-alt fa-lg"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+    <!-- ═══════════════════════ END SIDEBAR ═══════════════════════ -->
+
+
+    <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+    <div id="main-content">
+
+        <!-- Topbar -->
+        <nav class="topbar navbar px-2 px-md-4 py-2 border-bottom shadow-sm">
+            <div class="d-flex align-items-center overflow-hidden me-2">
+                <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary me-2 flex-shrink-0" aria-label="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="rounded me-2 d-none d-sm-inline-block shadow-sm" style="height: 30px; width: 30px; object-fit: contain; background: #fff; padding: 1px;">
+                <span class="topbar-title text-truncate fw-bold font-mono" style="font-size: 0.95rem;">
+                    {% block page_title %}{{ BRAND_NAME }} &bull; Management Portal{% endblock %}
+                </span>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-2 flex-shrink-0">
+                {% include 'includes/theme_toggle_button.html' %}
+                <!-- Role badge in topbar -->
+                <span class="badge bg-light text-dark border px-2 py-1 small d-none d-md-inline font-mono">
+                    <i class="fas fa-user-circle text-primary me-1"></i> {{ user_role }}
+                </span>
+                <a href="{% url 'core:home' %}" class="btn btn-sm btn-outline-warning d-none d-lg-inline-flex align-items-center font-mono" style="font-size: 0.78rem;">
+                    <i class="fas fa-store me-1"></i> Customer Store
+                </a>
+            </div>
+        </nav>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div class="px-3 px-md-4 pt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-2" role="alert">
+                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        <div class="content-body p-3 p-md-4 flex-grow-1">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="content-footer border-top py-3 mt-auto">
+            <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 text-muted small">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'img/logo.jpeg' %}" alt="Logo" class="rounded bg-white p-1 shadow-sm" style="height: 26px; width: 26px; object-fit: contain;">
+                    <span>&copy; {% now "Y" %} <strong>{{ COMPANY_NAME }}</strong> ({{ BRAND_NAME }}) &bull; {{ BRAND_MOTTO }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 font-mono" style="font-size: 0.75rem;">
+                    <span class="badge bg-light text-secondary border">Bono Hub &bull; Sunyani</span>
+                    <span>SikaDev Software</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- ═══════════════════════ END MAIN CONTENT ═══════════════════════ -->
+
+</div>
+
+{% block modals %}{% endblock %}
+
+<!-- Offline Bootstrap 5 JS -->
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- Responsive Sidebar Toggle JS -->
+<script>
+    (function () {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        function toggleSidebar() {
+            if (window.innerWidth < 992) {
+                sidebar.classList.toggle('show');
+                backdrop.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.remove('show');
+            backdrop.classList.remove('show');
+        }
+
+        toggleBtn?.addEventListener('click', toggleSidebar);
+        backdrop?.addEventListener('click', closeMobileSidebar);
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 992) {
+                closeMobileSidebar();
+            }
+        });
+    })();
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
