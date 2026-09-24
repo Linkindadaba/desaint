@@ -86,6 +86,35 @@
                 </div>
                 <i class="fas fa-hand-holding-dollar fa-2x text-danger opacity-50"></i>
             </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ INVENTORY & WAREHOUSE VALUATION STRIP ═══════════════════════ -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="cv-card p-3 h-100 d-flex justify-content-between align-items-center">
+            <div>
+                <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Sunyani Warehouse Stock Valuation</span>
+                <h4 class="font-mono fw-bold text-dark my-1">GH₵ {{ stats.inventory_cost_val }}</h4>
+                <small class="text-muted font-mono">{{ stats.total_inventory_pieces }} effective loose pieces in inventory</small>
+            </div>
+            <a href="{% url 'inventory:dashboard' %}" class="btn btn-sm btn-outline-primary font-mono text-nowrap">
+                <i class="fas fa-boxes-stacked me-1"></i> Inventory &rarr;
+            </a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="cv-card p-3 h-100 d-flex justify-content-between align-items-center">
+            <div>
+                <span class="text-muted text-uppercase font-mono" style="font-size: 0.7rem;">Stock Health & Safety Reorder</span>
+                <h4 class="font-mono fw-bold {% if stats.low_stock_count > 0 %}text-warning{% else %}text-success{% endif %} my-1">
+                    {% if stats.low_stock_count > 0 %}{{ stats.low_stock_count }} Low Stock Line(s){% else %}All Stock Healthy{% endif %}
+                </h4>
+                <small class="text-muted font-mono">Break-bulk unboxing & procurement alerts</small>
+            </div>
+            <a href="{% url 'inventory:ledger' %}" class="btn btn-sm btn-dark font-mono text-nowrap">
+                <i class="fas fa-warehouse me-1"></i> Stock Ledger &rarr;
+            </a>
         </div>
     </div>
 </div>

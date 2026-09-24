@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -99,23 +99,91 @@ def dashboard(request):
     custom_copies = CustomBookOrder.objects.aggregate(total_copies=Sum('quantity'))['total_copies'] or 0
     waybills_count = RegionalWaybill.objects.filter(status='IN_TRANSIT').count()
 
+    # Real Inventory Valuation
+    try:
+        from inventory.models import InventoryItem
+        inv_items = list(InventoryItem.objects.all())
+        total_inv_cost = sum(it.total_cost_valuation for it in inv_items)
+        low_stock_count = sum(1 for it in inv_items if it.is_low_stock)
+        total_pieces = sum(it.total_retail_pieces for it in inv_items)
+    except Exception:
+        total_inv_cost = Decimal('0.00')
+        low_stock_count = 0
+        total_pieces = 0
+
+    # Dynamic Today & Month Sales
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+
+    today_sales_aggr = POSSale.objects.filter(created_at__date=today).aggregate(
+        total=Sum('total_amount'),
+        cash=Sum('total_amount', filter=Q(payment_mode='CASH')),
+        momo=Sum('total_amount', filter=Q(payment_mode='MOMO_TILL'))
+    )
+    today_sales_val = today_sales_aggr['total'] or Decimal('0.00')
+    today_cash = today_sales_aggr['cash'] or Decimal('0.00')
+    today_momo = today_sales_aggr['momo'] or Decimal('0.00')
+
+    # Monthly revenue across POS, custom book orders, and B2B invoices
+    month_pos = POSSale.objects.filter(created_at__date__gte=month_start).aggregate(Sum('total_amount'))['total_amount__sum'] or Decimal('0.00')
+    month_custom = CustomBookOrder.objects.filter(created_at__date__gte=month_start).aggregate(Sum('net_payable'))['net_payable__sum'] or Decimal('0.00')
+    month_inv = Invoice.objects.filter(created_at__date__gte=month_start).aggregate(Sum('total_payable'))['total_payable__sum'] or Decimal('0.00')
+    monthly_rev = month_pos + month_custom + month_inv
+
     stats = {
-        'today_sales': '3,850.00',
-        'monthly_revenue': '94,200.00',
+        'today_sales': f"{today_sales_val:,.2f}",
+        'monthly_revenue': f"{monthly_rev:,.2f}",
         'active_custom_orders': custom_orders_count,
-        'custom_copies_in_production': custom_copies if custom_copies else 32500,
-        'school_debt_outstanding': f"{credit_stats['total_balance'] or Decimal('18400.00'):,.2f}",
-        'waybills_in_transit': waybills_count if waybills_count else 2,
-        'momo_balance': '14,250.00',
-        'cash_in_till': '4,100.00',
+        'custom_copies_in_production': custom_copies,
+        'school_debt_outstanding': f"{credit_stats['total_balance'] or Decimal('0.00'):,.2f}",
+        'waybills_in_transit': waybills_count,
+        'momo_balance': f"{today_momo:,.2f}",
+        'cash_in_till': f"{today_cash:,.2f}",
+        'inventory_cost_val': f"{total_inv_cost:,.2f}",
+        'low_stock_count': low_stock_count,
+        'total_inventory_pieces': f"{total_pieces:,}",
     }
 
-    recent_orders = [
-        {'id': 'DSP-ORD-1092', 'channel': 'Counter POS', 'client': 'Walk-in Retail', 'items': '3x Exercise 80pg, 1x Pen Pack', 'total': '48.50', 'status': 'Paid (Cash)', 'time': '10 mins ago'},
-        {'id': 'DSP-ORD-1091', 'channel': 'B2B Wholesale', 'client': 'Agyeiwaa Bookshop (Berekum)', 'items': '10 Boxes Copy Paper, 5ctn Pens', 'total': '3,250.00', 'status': 'Paid (MoMo)', 'time': '1 hour ago'},
-        {'id': 'DSP-ORD-1089', 'channel': 'School Custom', 'client': 'St. James Seminary SHS', 'items': '7,500x Custom Exercise Books (80pg)', 'total': '23,280.00', 'status': 'Proof Approved', 'time': '3 hours ago'},
-        {'id': 'DSP-ORD-1088', 'channel': 'Institutional', 'client': 'Ridge Experimental Basic', 'items': '3,000x Note 1 Hardcover Books', 'total': '28,500.00', 'status': 'Credit (Term 1)', 'time': 'Yesterday'},
-    ]
+    # Real Recent Transactions from POS, Custom Orders, and Invoices
+    recent_orders = []
+    for s in POSSale.objects.order_by('-created_at')[:4]:
+        recent_orders.append({
+            'id': s.receipt_number,
+            'channel': 'Counter POS',
+            'client': f"Walk-in ({s.cashier_name})",
+            'items': f"{len(s.parsed_items)} line(s)",
+            'total': f"{s.total_amount:,.2f}",
+            'status': f"Paid ({s.get_payment_mode_display()})",
+            'created_at': s.created_at,
+            'time': s.created_at.strftime('%b %d, %I:%M %p')
+        })
+
+    for c in CustomBookOrder.objects.order_by('-created_at')[:3]:
+        recent_orders.append({
+            'id': c.order_ref,
+            'channel': 'School Custom',
+            'client': c.school_name,
+            'items': f"{c.quantity:,}x {c.ruling.name if c.ruling else 'Custom'}",
+            'total': f"{c.net_payable:,.2f}",
+            'status': c.get_status_display(),
+            'created_at': c.created_at,
+            'time': c.created_at.strftime('%b %d, %I:%M %p')
+        })
+
+    for inv in Invoice.objects.order_by('-created_at')[:3]:
+        recent_orders.append({
+            'id': inv.invoice_number,
+            'channel': inv.get_invoice_type_display(),
+            'client': inv.client_name,
+            'items': f"{inv.items.count()} line item(s)",
+            'total': f"{inv.total_payable:,.2f}",
+            'status': inv.get_payment_method_display(),
+            'created_at': inv.created_at,
+            'time': inv.created_at.strftime('%b %d, %I:%M %p')
+        })
+
+    recent_orders.sort(key=lambda x: x['created_at'], reverse=True)
+    recent_orders = recent_orders[:6]
 
     # ─── Business BI & Analytics Metrics ──────────────────────────────────
     # 1. School Credit Recovery Rate
@@ -138,7 +206,6 @@ def dashboard(request):
     }
 
     # 2. Revenue by Commercial Channel
-    from invoices.models import Invoice
     real_pos = POSSale.objects.aggregate(total=Sum('total_amount'))['total']
     pos_rev = real_pos if (real_pos and real_pos > Decimal('500.00')) else Decimal('18920.00')
 
@@ -345,6 +412,94 @@ def record_payment(request, pk=None):
     return redirect('managerial:credit_ledger')
 
 
+@ceo_required
+def create_credit_record(request):
+    """Creates a new institutional school credit account."""
+    if request.method == 'POST':
+        school_name = request.POST.get('school_name', '').strip()
+        location = request.POST.get('location', '').strip() or 'Sunyani'
+        principal_name = request.POST.get('principal_name', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        academic_term = request.POST.get('academic_term', '').strip() or 'Term 1 (2026/2027 Academic Year)'
+        total_credit_raw = request.POST.get('total_credit_granted', '0').replace(',', '').strip()
+        term_due_date = request.POST.get('term_due_date')
+        notes = request.POST.get('notes', '').strip()
+
+        if not school_name or not phone_number or not term_due_date:
+            messages.error(request, "School name, phone number, and term due date are required.")
+            return redirect('managerial:credit_ledger')
+
+        try:
+            total_credit = Decimal(total_credit_raw)
+        except Exception:
+            messages.error(request, "Invalid credit amount specified.")
+            return redirect('managerial:credit_ledger')
+
+        record = SchoolCreditRecord.objects.create(
+            school_name=school_name,
+            location=location,
+            principal_name=principal_name,
+            phone_number=phone_number,
+            academic_term=academic_term,
+            total_credit_granted=total_credit,
+            amount_paid=Decimal('0.00'),
+            term_due_date=term_due_date,
+            status='CURRENT',
+            notes=notes
+        )
+        messages.success(request, f"Credit account for '{record.school_name}' registered successfully.")
+    return redirect('managerial:credit_ledger')
+
+
+@ceo_required
+def edit_credit_record(request, pk):
+    """Updates an existing school credit record."""
+    record = get_object_or_404(SchoolCreditRecord, pk=pk)
+    if request.method == 'POST':
+        record.school_name = request.POST.get('school_name', record.school_name).strip()
+        record.location = request.POST.get('location', record.location).strip()
+        record.principal_name = request.POST.get('principal_name', record.principal_name).strip()
+        record.phone_number = request.POST.get('phone_number', record.phone_number).strip()
+        record.academic_term = request.POST.get('academic_term', record.academic_term).strip()
+        due_date = request.POST.get('term_due_date')
+        if due_date:
+            record.term_due_date = due_date
+
+        credit_raw = request.POST.get('total_credit_granted', '').replace(',', '').strip()
+        if credit_raw:
+            try:
+                record.total_credit_granted = Decimal(credit_raw)
+            except Exception:
+                pass
+
+        paid_raw = request.POST.get('amount_paid', '').replace(',', '').strip()
+        if paid_raw:
+            try:
+                record.amount_paid = Decimal(paid_raw)
+            except Exception:
+                pass
+
+        status = request.POST.get('status')
+        if status in dict(SchoolCreditRecord.STATUS_CHOICES):
+            record.status = status
+
+        record.notes = request.POST.get('notes', record.notes).strip()
+        record.save()
+        messages.success(request, f"Credit account for '{record.school_name}' updated successfully.")
+    return redirect('managerial:credit_ledger')
+
+
+@ceo_required
+def delete_credit_record(request, pk):
+    """Deletes a school credit record."""
+    record = get_object_or_404(SchoolCreditRecord, pk=pk)
+    if request.method == 'POST':
+        name = record.school_name
+        record.delete()
+        messages.info(request, f"Credit account for '{name}' was removed from the ledger.")
+    return redirect('managerial:credit_ledger')
+
+
 @logistics_required
 def waybills(request):
     """
@@ -377,10 +532,16 @@ def waybills(request):
         })
 
     carrier_choices = RegionalWaybill.CARRIER_CHOICES
+    in_transit_count = waybills_qs.filter(status='IN_TRANSIT').count()
+    delivered_count = waybills_qs.filter(status='DELIVERED_AND_SIGNED').count()
 
     context = {
         'consignments': consignments,
+        'all_waybills': waybills_qs,
         'carrier_choices': carrier_choices,
+        'status_choices': RegionalWaybill.STATUS_CHOICES,
+        'in_transit_count': in_transit_count,
+        'delivered_count': delivered_count,
     }
     return render(request, 'managerial/waybills.html', context)
 
@@ -419,6 +580,44 @@ def create_waybill(request):
             sms_alert_sent=True
         )
         messages.success(request, f"Waybill {waybill.waybill_number} logged successfully! Dispatch SMS sent to {waybill.recipient_phone}.")
+    return redirect('managerial:waybills')
+
+
+@logistics_required
+def update_waybill_status(request, pk):
+    """Updates tracking status and driver contact of a regional waybill."""
+    waybill = get_object_or_404(RegionalWaybill, pk=pk)
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        if status in dict(RegionalWaybill.STATUS_CHOICES):
+            waybill.status = status
+            if status == 'DELIVERED_AND_SIGNED' and not waybill.delivered_at:
+                waybill.delivered_at = timezone.now()
+
+        driver_name = request.POST.get('driver_conductor_name', '').strip()
+        if driver_name:
+            waybill.driver_conductor_name = driver_name
+        driver_phone = request.POST.get('driver_phone', '').strip()
+        if driver_phone:
+            waybill.driver_phone = driver_phone
+
+        destination = request.POST.get('destination_town', '').strip()
+        if destination:
+            waybill.destination_town = destination
+
+        waybill.save()
+        messages.success(request, f"Waybill {waybill.waybill_number} updated to '{waybill.get_status_display()}'.")
+    return redirect('managerial:waybills')
+
+
+@logistics_required
+def delete_waybill(request, pk):
+    """Deletes / cancels a waybill record."""
+    waybill = get_object_or_404(RegionalWaybill, pk=pk)
+    if request.method == 'POST':
+        wb_num = waybill.waybill_number
+        waybill.delete()
+        messages.info(request, f"Waybill {wb_num} was cancelled and deleted.")
     return redirect('managerial:waybills')
 
 
@@ -490,6 +689,14 @@ def database_backup_view(request):
     if db_path and os.path.exists(str(db_path)):
         db_size_mb = round(os.path.getsize(str(db_path)) / (1024 * 1024), 2)
 
+    try:
+        from inventory.models import InventoryItem, Supplier
+        inv_count = InventoryItem.objects.count()
+        supp_count = Supplier.objects.count()
+    except Exception:
+        inv_count = 0
+        supp_count = 0
+
     stats = {
         'products_count': Product.objects.count(),
         'categories_count': Category.objects.count(),
@@ -498,6 +705,8 @@ def database_backup_view(request):
         'credit_records_count': SchoolCreditRecord.objects.count(),
         'waybills_count': RegionalWaybill.objects.count(),
         'invoices_count': Invoice.objects.count(),
+        'inventory_count': inv_count,
+        'suppliers_count': supp_count,
         'staff_count': User.objects.filter(is_staff=True).count(),
         'db_size_mb': db_size_mb,
         'db_engine': settings.DATABASES['default'].get('ENGINE', '').split('.')[-1],
@@ -512,7 +721,7 @@ def export_database_json(request):
     buf = io.StringIO()
     call_command(
         'dumpdata',
-        'catalog', 'customizer', 'orders', 'managerial', 'invoices', 'auth.User', 'auth.Group',
+        'catalog', 'customizer', 'orders', 'managerial', 'invoices', 'inventory', 'auth.User', 'auth.Group',
         stdout=buf,
         indent=2
     )
@@ -566,6 +775,45 @@ def export_csv_view(request, dataset):
         writer.writerow(['ID', 'Product Name', 'SKU', 'Category', 'Retail Price (GHS)', 'Wholesale Price (GHS)', 'Box Size', 'Stock Status', 'Active'])
         for prod in Product.objects.select_related('category').all():
             writer.writerow([prod.id, prod.name, prod.sku, prod.category.name if prod.category else '', prod.retail_price, prod.wholesale_price, prod.wholesale_box_size, prod.get_stock_status_display(), prod.is_active])
+
+    elif dataset == 'inventory':
+        from inventory.models import InventoryItem
+        writer.writerow(['ID', 'SKU', 'Product Name', 'Category', 'Supplier', 'Cartons', 'Loose Units', 'Pieces/Carton', 'Total Pieces', 'Cost Price (GHS)', 'Valuation (GHS)', 'Location'])
+        for item in InventoryItem.objects.select_related('product', 'product__category', 'supplier').all():
+            writer.writerow([
+                item.id,
+                item.product.sku,
+                item.product.name,
+                item.product.category.name if item.product.category else '',
+                item.supplier.name if item.supplier else 'None',
+                item.carton_stock,
+                item.loose_stock,
+                item.pieces_per_carton,
+                item.total_retail_pieces,
+                item.cost_price,
+                item.total_cost_valuation,
+                item.warehouse_location,
+            ])
+
+    elif dataset == 'invoices':
+        writer.writerow(['ID', 'Invoice Number', 'Client Name', 'TIN', 'Phone', 'Type', 'Tax Mode', 'Subtotal (GHS)', 'WHT (GHS)', 'VAT (GHS)', 'Total Payable (GHS)', 'Payment Method', 'Paid', 'Date'])
+        for inv in Invoice.objects.all():
+            writer.writerow([
+                inv.id,
+                inv.invoice_number,
+                inv.client_name,
+                inv.client_tin,
+                inv.client_phone,
+                inv.get_invoice_type_display(),
+                inv.get_tax_mode_display(),
+                inv.subtotal,
+                inv.wht_amount,
+                inv.vat_amount,
+                inv.total_payable,
+                inv.get_payment_method_display(),
+                'Yes' if inv.is_paid else 'No',
+                inv.created_at.strftime('%Y-%m-%d %H:%M'),
+            ])
 
     else:
         messages.error(request, "Invalid export dataset requested.")

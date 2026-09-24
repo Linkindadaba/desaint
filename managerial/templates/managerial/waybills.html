@@ -32,15 +32,15 @@
     <div class="col-sm-6 col-lg-3">
         <div class="cv-card p-3">
             <span class="text-muted text-uppercase font-mono small">In Transit Today</span>
-            <h4 class="font-mono fw-bold text-primary my-1">2 Consignments</h4>
-            <small class="text-primary fw-bold font-mono">Kumasi & Tamale routes</small>
+            <h4 class="font-mono fw-bold text-primary my-1">{{ in_transit_count }} Consignment(s)</h4>
+            <small class="text-primary fw-bold font-mono">Active on highways</small>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
         <div class="cv-card p-3">
-            <span class="text-muted text-uppercase font-mono small">Delivered This Week</span>
-            <h4 class="font-mono fw-bold text-success my-1">18 Consignments</h4>
-            <small class="text-success fw-bold font-mono">100% On-time Arrival</small>
+            <span class="text-muted text-uppercase font-mono small">Delivered / Signed</span>
+            <h4 class="font-mono fw-bold text-success my-1">{{ delivered_count }} Consignment(s)</h4>
+            <small class="text-success fw-bold font-mono">Verified Collections</small>
         </div>
     </div>
     <div class="col-sm-6 col-lg-3">
@@ -74,6 +74,7 @@
                     <th>Driver Contact</th>
                     <th>Status</th>
                     <th>Dispatch Time</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -101,6 +102,23 @@
                             <span class="{{ c.status_class }}">{{ c.status }}</span>
                         </td>
                         <td class="text-muted">{{ c.dispatched_at }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary py-0 px-2" title="Update Status & Driver" data-bs-toggle="modal" data-bs-target="#updateWaybillModal{{ c.id }}">
+                                    <i class="fas fa-truck-ramp-box"></i>
+                                </button>
+                                <button class="btn btn-outline-danger py-0 px-2" title="Cancel & Delete Waybill" data-bs-toggle="modal" data-bs-target="#deleteWaybillModal{{ c.id }}">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-bus-simple fa-2x mb-2 opacity-50 d-block"></i>
+                            No regional waybill records logged yet.
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -111,15 +129,19 @@
         <i class="fas fa-bell text-primary me-1"></i> <strong>Automated SMS Notification:</strong> When parcels are booked at the Sunyani bus terminal, the recipient automatically receives an SMS with the Bus Waybill Number, Destination Station, and Driver contact for fast collection.
     </div>
 </div>
+{% endblock %}
 
-<!-- LOG NEW WAYBILL MODAL -->
+{% block modals %}
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- 1. LOG NEW WAYBILL MODAL -->
 <div class="modal fade" id="newWaybillModal" tabindex="-1" aria-labelledby="newWaybillModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered font-mono">
         <div class="modal-content">
-            <div class="modal-header border-bottom">
-                <h5 class="modal-title fw-bold" id="newWaybillModalLabel" style="color: var(--cv-primary);">
-                    <i class="fas fa-bus-simple me-2 text-info"></i>Log Regional Bus Consignment
-                </h5>
+            <div class="modal-header border-bottom bg-info text-dark">
+                <h6 class="modal-title fw-bold" id="newWaybillModalLabel">
+                    <i class="fas fa-bus-simple me-2"></i>Log Regional Bus Consignment
+                </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{% url 'managerial:create_waybill' %}" method="post">
@@ -128,7 +150,7 @@
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Bus Carrier / Service</label>
-                            <select name="carrier" class="form-select font-mono small" required>
+                            <select name="carrier" class="form-select form-select-sm" required>
                                 {% for code, label in carrier_choices %}
                                     <option value="{{ code }}">{{ label }}</option>
                                 {% endfor %}
@@ -136,41 +158,41 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Waybill # (Optional)</label>
-                            <input type="text" name="waybill_number" class="form-control font-mono small" placeholder="Auto-generated if blank">
+                            <input type="text" name="waybill_number" class="form-control form-control-sm" placeholder="Auto-generated if blank">
                         </div>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Destination Station / Town</label>
-                            <input type="text" name="destination_town" class="form-control font-mono small" placeholder="e.g. Kumasi (Asafo) or Tamale" required>
+                            <input type="text" name="destination_town" class="form-control form-control-sm" placeholder="e.g. Kumasi (Asafo) or Tamale" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Recipient School / Client</label>
-                            <input type="text" name="recipient_name" class="form-control font-mono small" placeholder="School or Bookshop name" required>
+                            <input type="text" name="recipient_name" class="form-control form-control-sm" placeholder="School or Bookshop name" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Recipient Phone Number (for SMS alert)</label>
-                        <input type="text" name="recipient_phone" class="form-control font-mono small" placeholder="e.g. 024 400 1122" required>
+                        <input type="text" name="recipient_phone" class="form-control form-control-sm" placeholder="e.g. 024 400 1122" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Consignment Description</label>
-                        <input type="text" name="consignment_summary" class="form-control font-mono small" placeholder="e.g. 10 Cartons Custom Exercise Books (80pg)" required>
+                        <input type="text" name="consignment_summary" class="form-control form-control-sm" placeholder="e.g. 10 Cartons Custom Exercise Books (80pg)" required>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-2 mb-2">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Driver / Conductor Name</label>
-                            <input type="text" name="driver_conductor_name" class="form-control font-mono small" placeholder="Driver name">
+                            <input type="text" name="driver_conductor_name" class="form-control form-control-sm" placeholder="Driver name">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Driver Phone</label>
-                            <input type="text" name="driver_phone" class="form-control font-mono small" placeholder="Driver contact">
+                            <input type="text" name="driver_phone" class="form-control form-control-sm" placeholder="Driver contact">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-mono" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-sm btn-info text-dark font-mono fw-bold px-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-info text-dark fw-bold px-3">
                         <i class="fas fa-paper-plane me-1"></i> Dispatch & Send SMS Alert
                     </button>
                 </div>
@@ -178,6 +200,96 @@
         </div>
     </div>
 </div>
+
+<!-- 2. UPDATE STATUS & DELETE MODALS PER WAYBILL -->
+{% for w in all_waybills %}
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateWaybillModal{{ w.id }}" tabindex="-1" aria-labelledby="updateWaybillModalLabel{{ w.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold" id="updateWaybillModalLabel{{ w.id }}">
+                    <i class="fas fa-truck-fast me-2"></i> Update Waybill: {{ w.waybill_number }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'managerial:update_waybill_status' w.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-2 mb-3 bg-light rounded border small">
+                        <div><strong>Recipient:</strong> {{ w.recipient_name }} ({{ w.recipient_phone }})</div>
+                        <div><strong>Carrier:</strong> {{ w.get_carrier_display }} &bull; {{ w.origin_hub }} &rarr; {{ w.destination_town }}</div>
+                        <div><strong>Parcels:</strong> {{ w.consignment_summary }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Transit Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            {% for sc_code, sc_label in status_choices %}
+                                <option value="{{ sc_code }}" {% if w.status == sc_code %}selected{% endif %}>{{ sc_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Driver / Conductor Name</label>
+                            <input type="text" name="driver_conductor_name" value="{{ w.driver_conductor_name }}" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Driver Phone</label>
+                            <input type="text" name="driver_phone" value="{{ w.driver_phone }}" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Destination Town</label>
+                        <input type="text" name="destination_town" value="{{ w.destination_town }}" class="form-control form-control-sm">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-dark fw-bold">
+                        <i class="fas fa-check me-1"></i> Update Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Waybill Modal -->
+<div class="modal fade" id="deleteWaybillModal{{ w.id }}" tabindex="-1" aria-labelledby="deleteWaybillModalLabel{{ w.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title fw-bold" id="deleteWaybillModalLabel{{ w.id }}">
+                    <i class="fas fa-trash-can me-2"></i> Cancel Waybill: {{ w.waybill_number }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'managerial:delete_waybill' w.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="mb-2">Are you sure you want to cancel and delete waybill <strong>{{ w.waybill_number }}</strong>?</p>
+                    <div class="p-2 bg-light border rounded small">
+                        <div>Recipient: <strong>{{ w.recipient_name }}</strong></div>
+                        <div>Route: <strong>{{ w.origin_hub }} &rarr; {{ w.destination_town }}</strong></div>
+                        <div>Carrier: <strong>{{ w.get_carrier_display }}</strong></div>
+                    </div>
+                    <small class="text-muted d-block mt-2">This action cannot be undone.</small>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold">
+                        <i class="fas fa-trash-can me-1"></i> Yes, Delete Waybill
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <script>
 function filterWaybills() {

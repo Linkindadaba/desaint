@@ -51,6 +51,7 @@ def seed_data():
             'stock_status': 'IN_STOCK',
             'stock_quantity': 4500,
             'icon_class': 'fas fa-book text-primary',
+            'image': 'products/exercise_80pg.jpg',
             'is_customizable': True
         },
         {
@@ -65,6 +66,7 @@ def seed_data():
             'stock_status': 'IN_STOCK',
             'stock_quantity': 1800,
             'icon_class': 'fas fa-book-bookmark text-success',
+            'image': 'products/hardcover_160pg.jpg',
             'is_customizable': True
         },
         {
@@ -79,6 +81,7 @@ def seed_data():
             'stock_status': 'AVAILABLE_ON_ORDER',
             'stock_quantity': 600,
             'icon_class': 'fas fa-pencil text-warning',
+            'image': 'products/preschool_grid.jpg',
             'is_customizable': True
         },
         {
@@ -93,6 +96,7 @@ def seed_data():
             'stock_status': 'IN_STOCK',
             'stock_quantity': 420,
             'icon_class': 'fas fa-file-lines text-info',
+            'image': 'products/a4_copy_paper.jpg',
             'is_customizable': False
         },
         {
@@ -107,6 +111,7 @@ def seed_data():
             'stock_status': 'IN_STOCK',
             'stock_quantity': 350,
             'icon_class': 'fas fa-pen text-dark',
+            'image': 'products/marker_pens.jpg',
             'is_customizable': False
         },
         {
@@ -121,6 +126,7 @@ def seed_data():
             'stock_status': 'IN_STOCK',
             'stock_quantity': 750,
             'icon_class': 'fas fa-ruler-combined text-warning',
+            'image': 'products/geometry_set.jpg',
             'is_customizable': False
         }
     ]

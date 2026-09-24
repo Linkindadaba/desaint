@@ -14,6 +14,9 @@
         <a href="{% url 'managerial:dashboard' %}" class="btn btn-sm btn-outline-secondary font-mono">
             <i class="fas fa-arrow-left me-1"></i> CEO Dashboard
         </a>
+        <button class="btn btn-sm btn-primary font-mono" data-bs-toggle="modal" data-bs-target="#addCreditModal">
+            <i class="fas fa-plus me-1"></i> Register School Account
+        </button>
         <button class="btn btn-sm btn-outline-warning text-dark bg-warning font-mono" onclick="window.print()">
             <i class="fas fa-print me-1"></i> Print Debt Schedule
         </button>
@@ -25,15 +28,15 @@
     <div class="col-md-4">
         <div class="cv-card p-3">
             <span class="text-muted text-uppercase font-mono small">Total Term Credit Extended</span>
-            <h3 class="font-mono fw-bold text-dark my-1">GH₵ 66,700.00</h3>
-            <small class="text-muted">Academic Term 1 Active Supply</small>
+            <h3 class="font-mono fw-bold text-dark my-1">GH₵ {{ total_granted }}</h3>
+            <small class="text-muted">Academic Term Active Supply</small>
         </div>
     </div>
     <div class="col-md-4">
         <div class="cv-card p-3">
             <span class="text-muted text-uppercase font-mono small">Installments Recovered</span>
             <h3 class="font-mono fw-bold text-success my-1">GH₵ {{ total_recovered }}</h3>
-            <small class="text-success fw-bold font-mono">53.8% Collection Rate</small>
+            <small class="text-success fw-bold font-mono">Real-time Collections</small>
         </div>
     </div>
     <div class="col-md-4">
@@ -55,7 +58,7 @@
                 <input type="text" id="schoolSearchInput" class="form-control form-control-sm font-mono border-start-0" placeholder="Search school..." onkeyup="filterSchools()">
             </div>
             <button class="btn btn-sm btn-dark text-nowrap font-mono" data-bs-toggle="modal" data-bs-target="#recordPaymentModal" onclick="openPaymentModal(null, '')">
-                <i class="fas fa-plus me-1"></i> Record Payment
+                <i class="fas fa-receipt me-1"></i> Record Payment
             </button>
         </div>
     </div>
@@ -72,7 +75,7 @@
                     <th>Balance Due</th>
                     <th>Due Date</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -99,18 +102,25 @@
                         <td>
                             <span class="{{ s.status_class }}">{{ s.status }}</span>
                         </td>
-                        <td>
+                        <td class="text-end">
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-success py-0 px-2" title="Record Installment Payment" data-bs-toggle="modal" data-bs-target="#recordPaymentModal" onclick="openPaymentModal('{{ s.id }}', '{{ s.school_name|escapejs }}', '{{ s.balance_due }}')">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </button>
-                                <button class="btn btn-outline-secondary py-0 px-2" title="Send WhatsApp Reminder" onclick="alert('WhatsApp reminder triggered for {{ s.contact_person|escapejs }} ({{ s.phone }}).')">
-                                    <i class="fab fa-whatsapp text-success"></i>
+                                <button class="btn btn-outline-secondary py-0 px-2" title="Edit School Account" data-bs-toggle="modal" data-bs-target="#editCreditModal{{ s.id }}">
+                                    <i class="fas fa-pencil"></i>
                                 </button>
-                                <a href="{% url 'invoices:sample' %}" class="btn btn-outline-primary py-0 px-2" title="View Statement / Proforma">
-                                    <i class="fas fa-file-invoice"></i>
-                                </a>
+                                <button class="btn btn-outline-danger py-0 px-2" title="Delete Credit Account" data-bs-toggle="modal" data-bs-target="#deleteCreditModal{{ s.id }}">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
                             </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-file-invoice-dollar fa-2x mb-2 opacity-50 d-block"></i>
+                            No school credit accounts registered yet.
                         </td>
                     </tr>
                 {% endfor %}
@@ -119,26 +129,30 @@
     </div>
 
     <div class="mt-3 p-3 bg-light rounded small border">
-        <i class="fas fa-circle-info text-primary me-1"></i> <strong>Executive Summary:</strong> SMS and WhatsApp balance reminders can be triggered 7 days prior to term due dates. Proformas feature GRA 3% WHT deductions under Act 896 to maintain institutional audit readiness.
+        <i class="fas fa-circle-info text-primary me-1"></i> <strong>Executive Summary:</strong> SMS and WhatsApp balance reminders can be triggered prior to term due dates. Proformas feature GRA 3% WHT deductions under Act 896 to maintain institutional audit readiness.
     </div>
 </div>
+{% endblock %}
 
-<!-- RECORD PAYMENT MODAL -->
+{% block modals %}
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- 1. RECORD PAYMENT MODAL -->
 <div class="modal fade" id="recordPaymentModal" tabindex="-1" aria-labelledby="recordPaymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered font-mono">
         <div class="modal-content">
-            <div class="modal-header border-bottom">
-                <h5 class="modal-title fw-bold" id="recordPaymentModalLabel" style="color: var(--cv-primary);">
-                    <i class="fas fa-receipt me-2 text-success"></i>Record School Credit Payment
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-bottom bg-success text-white">
+                <h6 class="modal-title fw-bold" id="recordPaymentModalLabel">
+                    <i class="fas fa-receipt me-2"></i>Record School Credit Payment
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{% url 'managerial:record_payment_general' %}" method="post">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Select School / Institution</label>
-                        <select id="modalSchoolSelect" name="school_id" class="form-select font-mono" required>
+                        <select id="modalSchoolSelect" name="school_id" class="form-select form-select-sm" required>
                             <option value="">-- Choose School Record --</option>
                             {% for sch in all_schools %}
                                 <option value="{{ sch.id }}">{{ sch.school_name }} (Due: GH₵ {{ sch.balance_outstanding|floatformat:2 }})</option>
@@ -147,20 +161,20 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Installment Amount (GH₵)</label>
-                        <div class="input-group">
-                            <span class="input-group-text font-mono fw-bold">GH₵</span>
-                            <input type="number" step="0.01" min="1" name="payment_amount" id="modalPaymentAmount" class="form-control font-mono fw-bold text-success fs-5" placeholder="0.00" required>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text fw-bold">GH₵</span>
+                            <input type="number" step="0.01" min="1" name="payment_amount" id="modalPaymentAmount" class="form-control fw-bold text-success fs-6" placeholder="0.00" required>
                         </div>
-                        <small id="modalBalanceHint" class="text-muted font-mono d-block mt-1"></small>
+                        <small id="modalBalanceHint" class="text-muted d-block mt-1"></small>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label small fw-bold">Transaction Reference / Receipt Notes</label>
-                        <input type="text" name="payment_notes" class="form-control font-mono small" placeholder="e.g. MTN MoMo Trans ID 204918239 or GCB Deposit Slip #44102">
+                        <input type="text" name="payment_notes" class="form-control form-control-sm" placeholder="e.g. MTN MoMo Trans ID or GCB Slip #">
                     </div>
                 </div>
                 <div class="modal-footer border-top bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-mono" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-sm btn-success font-mono fw-bold px-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-success fw-bold px-3">
                         <i class="fas fa-check me-1"></i> Post Payment to Ledger
                     </button>
                 </div>
@@ -168,6 +182,184 @@
         </div>
     </div>
 </div>
+
+<!-- 2. ADD SCHOOL CREDIT RECORD MODAL -->
+<div class="modal fade" id="addCreditModal" tabindex="-1" aria-labelledby="addCreditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="addCreditModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i> Register New School Credit Account
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'managerial:create_credit_record' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">School / Institution Name *</label>
+                        <input type="text" name="school_name" class="form-control form-control-sm" placeholder="e.g. Sunyani Model Junior High" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Town / Location</label>
+                            <input type="text" name="location" class="form-control form-control-sm" placeholder="e.g. Sunyani Central">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Academic Term</label>
+                            <input type="text" name="academic_term" value="Term 1 (2026/2027)" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Principal / Bursar Name</label>
+                            <input type="text" name="principal_name" class="form-control form-control-sm" placeholder="e.g. Mrs. Mary Owusu">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Phone Number *</label>
+                            <input type="text" name="phone_number" class="form-control form-control-sm" placeholder="024 400 1122" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Credit Amount Granted (GH₵) *</label>
+                            <input type="number" step="0.01" min="1" name="total_credit_granted" class="form-control form-control-sm fw-bold text-primary" placeholder="0.00" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Term Due Date *</label>
+                            <input type="date" name="term_due_date" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Credit Terms & Institutional Notes</label>
+                        <textarea name="notes" rows="2" class="form-control form-control-sm" placeholder="Supply contract notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                        <i class="fas fa-check me-1"></i> Open Credit Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 3. EDIT & DELETE MODALS PER SCHOOL -->
+{% for s in all_schools %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editCreditModal{{ s.id }}" tabindex="-1" aria-labelledby="editCreditModalLabel{{ s.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold" id="editCreditModalLabel{{ s.id }}">
+                    <i class="fas fa-pencil me-2"></i> Edit Account: {{ s.school_name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'managerial:edit_credit_record' s.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">School Name</label>
+                        <input type="text" name="school_name" value="{{ s.school_name }}" class="form-control form-control-sm" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Location</label>
+                            <input type="text" name="location" value="{{ s.location }}" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Academic Term</label>
+                            <input type="text" name="academic_term" value="{{ s.academic_term }}" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Contact Person</label>
+                            <input type="text" name="principal_name" value="{{ s.principal_name }}" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" name="phone_number" value="{{ s.phone_number }}" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Total Credit Granted (GH₵)</label>
+                            <input type="number" step="0.01" min="1" name="total_credit_granted" value="{{ s.total_credit_granted }}" class="form-control form-control-sm fw-bold">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Due Date</label>
+                            <input type="date" name="term_due_date" value="{{ s.term_due_date|date:'Y-m-d' }}" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Credit Standing Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="CURRENT" {% if s.status == 'CURRENT' %}selected{% endif %}>Current / In Good Standing</option>
+                            <option value="PARTIALLY_PAID" {% if s.status == 'PARTIALLY_PAID' %}selected{% endif %}>Partially Paid</option>
+                            <option value="FULLY_SETTLED" {% if s.status == 'FULLY_SETTLED' %}selected{% endif %}>Fully Settled</option>
+                            <option value="OVERDUE_NOTICE" {% if s.status == 'OVERDUE_NOTICE' %}selected{% endif %}>Overdue Notice Issued</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Notes</label>
+                        <textarea name="notes" rows="2" class="form-control form-control-sm">{{ s.notes }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-dark fw-bold">
+                        <i class="fas fa-check me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteCreditModal{{ s.id }}" tabindex="-1" aria-labelledby="deleteCreditModalLabel{{ s.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title fw-bold" id="deleteCreditModalLabel{{ s.id }}">
+                    <i class="fas fa-trash-can me-2"></i> Delete Account: {{ s.school_name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'managerial:delete_credit_record' s.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="mb-2">Are you sure you want to delete the school credit account for <strong>{{ s.school_name }}</strong>?</p>
+                    <div class="p-2 bg-light border rounded small">
+                        <div>Total Invoiced: <strong>GH₵ {{ s.total_credit_granted|floatformat:2 }}</strong></div>
+                        <div>Outstanding Balance: <strong class="text-danger">GH₵ {{ s.balance_outstanding|floatformat:2 }}</strong></div>
+                    </div>
+                    <small class="text-muted d-block mt-2">This action cannot be undone.</small>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold">
+                        <i class="fas fa-trash-can me-1"></i> Yes, Delete Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <script>
 function openPaymentModal(schoolId, schoolName, balanceDue) {

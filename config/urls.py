@@ -17,6 +17,8 @@ urlpatterns = [
     # Auth endpoints (login / logout)
     path('admin/', include('managerial.urls', namespace='managerial')),
     path('admin/pos/', include('orders.urls', namespace='orders')),
+    path('admin/inventory/', include('inventory.urls', namespace='inventory')),
+    path('admin/catalog/', include('catalog.urls', namespace='catalog')),
     path('admin/customizer/', include('customizer.urls', namespace='customizer')),
     path('admin/invoices/', include('invoices.urls', namespace='invoices')),
 

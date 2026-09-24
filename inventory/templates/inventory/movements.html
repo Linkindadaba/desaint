@@ -1,0 +1,148 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Stock Movement Audit Ledger — {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+
+    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 font-mono small">
+                    <li class="breadcrumb-item"><a href="{% url 'inventory:dashboard' %}" class="text-decoration-none">Inventory</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Movement Audit</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-0 text-dark">Immutable Stock Movement Audit Trail</h3>
+            <p class="text-muted small mb-0">Every restock, POS deduction, break-bulk unbox, and audit variance recorded with before/after balances</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'inventory:dashboard' %}" class="btn btn-outline-primary font-mono btn-sm">
+                <i class="fas fa-boxes-stacked me-1"></i> Dashboard
+            </a>
+            <a href="{% url 'inventory:ledger' %}" class="btn btn-primary font-mono btn-sm">
+                <i class="fas fa-list-check me-1"></i> Stock Ledger
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ FILTER CONTROLS ═══════════════════════ -->
+    <div class="card border shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center font-mono">
+                <div class="col-md-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted border-end-0">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0" placeholder="Search reference, product, SKU, note...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">All Movement Types</option>
+                        {% for code, label in movement_types %}
+                        <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark w-100">
+                        <i class="fas fa-filter me-1"></i> Filter Logs
+                    </button>
+                    {% if query or selected_type %}
+                    <a href="{% url 'inventory:movements' %}" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
+                        <i class="fas fa-xmark"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ AUDIT TRAIL TABLE ═══════════════════════ -->
+    <div class="card border shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 font-mono small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th>Product & SKU</th>
+                        <th class="text-center">Carton Delta</th>
+                        <th class="text-center">Loose Delta</th>
+                        <th class="text-center">Ending Balance</th>
+                        <th>Reference</th>
+                        <th>Staff User</th>
+                        <th>Audit Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movements %}
+                    <tr>
+                        <td class="text-nowrap text-muted" style="font-size: 0.75rem;">
+                            {{ mov.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ mov.badge_color }} text-{% if mov.badge_color == 'warning' %}dark{% else %}white{% endif %}">
+                                {{ mov.get_movement_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ mov.item.product.name }}</div>
+                            <div class="text-muted" style="font-size: 0.70rem;">SKU: {{ mov.item.product.sku }}</div>
+                        </td>
+                        <td class="text-center">
+                            {% if mov.carton_delta != 0 %}
+                            <span class="fw-bold {% if mov.carton_delta > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ mov.formatted_carton_delta }} {{ mov.item.bulk_unit_name }}s
+                            </span>
+                            {% else %}
+                            <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if mov.loose_delta != 0 %}
+                            <span class="fw-bold {% if mov.loose_delta > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ mov.formatted_loose_delta }} {{ mov.item.retail_unit_name }}s
+                            </span>
+                            {% else %}
+                            <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border">
+                                {{ mov.resulting_carton_stock }} Ctn &bull; {{ mov.resulting_loose_stock }} Loose
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-primary border font-mono">
+                                {{ mov.reference|default:"--" }}
+                            </span>
+                        </td>
+                        <td class="text-muted">
+                            {{ mov.created_by.get_full_name|default:mov.created_by.username|default:"System" }}
+                        </td>
+                        <td style="max-width: 250px;">
+                            <span class="text-truncate d-inline-block text-muted" style="max-width: 240px;" title="{{ mov.note }}">
+                                {{ mov.note|default:"--" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-clock-rotate-left fa-2x mb-2 opacity-50 d-block"></i>
+                            No stock movement records match the current filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -92,13 +92,23 @@
                                 <span class="badge bg-light text-muted border font-mono" style="font-size: 0.65rem;">
                                     SKU: {{ item.sku }}
                                 </span>
+                                {% if item.inventory %}
+                                <span class="badge {% if item.inventory.is_low_stock %}bg-warning text-dark{% else %}bg-success bg-opacity-10 text-success{% endif %} font-mono" style="font-size: 0.62rem;" title="{{ item.inventory.carton_stock }} {{ item.inventory.bulk_unit_name }}s & {{ item.inventory.loose_stock }} loose shelf units">
+                                    {{ item.inventory.carton_stock }} Ctn &bull; {{ item.inventory.loose_stock }} Loose
+                                </span>
+                                {% else %}
                                 <span class="badge bg-success bg-opacity-10 text-success font-mono" style="font-size: 0.62rem;">
                                     {{ item.stock_quantity }} in stock
                                 </span>
+                                {% endif %}
                             </div>
 
-                            <div class="text-center my-2">
-                                <i class="{{ item.icon_class }} fa-2x text-primary opacity-75"></i>
+                            <div class="text-center my-1" style="height: 54px; display: flex; align-items: center; justify-content: center;">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}" style="max-height: 50px; max-width: 100%; object-fit: contain;">
+                                {% else %}
+                                    <i class="{{ item.icon_class }} fa-2x text-primary opacity-75"></i>
+                                {% endif %}
                             </div>
 
                             <h6 class="mt-1 mb-2 fw-semibold text-truncate" style="font-size: 0.78rem; line-height: 1.2;" title="{{ item.name }}">

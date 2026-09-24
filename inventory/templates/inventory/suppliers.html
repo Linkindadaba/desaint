@@ -1,0 +1,230 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Suppliers & Commercial Distributors — {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+
+    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 font-mono small">
+                    <li class="breadcrumb-item"><a href="{% url 'inventory:dashboard' %}" class="text-decoration-none">Inventory</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Suppliers</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-0 text-dark">Commercial Paper & Material Suppliers</h3>
+            <p class="text-muted small mb-0">Authorized mills, paper converters, and stationery importers supplying Sunyani Central Hub</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary font-mono btn-sm" data-bs-toggle="modal" data-bs-target="#newSupplierModal">
+                <i class="fas fa-plus me-1"></i> Register Supplier
+            </button>
+            <a href="{% url 'inventory:ledger' %}" class="btn btn-outline-secondary font-mono btn-sm">
+                <i class="fas fa-list-check me-1"></i> Stock Ledger
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ SUPPLIERS GRID ═══════════════════════ -->
+    <div class="row g-3 mb-4">
+        {% for supp in suppliers %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100 border shadow-sm p-3 font-mono">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0 fs-6">{{ supp.name }}</h5>
+                        <span class="badge {% if supp.is_active %}bg-success bg-opacity-10 text-success border border-success{% else %}bg-secondary{% endif %} mt-1" style="font-size: 0.65rem;">
+                            {% if supp.is_active %}ACTIVE SUPPLIER{% else %}INACTIVE{% endif %}
+                        </span>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editSupplierModal-{{ supp.pk }}" title="Edit Supplier">
+                            <i class="fas fa-pencil"></i>
+                        </button>
+                        {% if is_ceo %}
+                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSupplierModal-{{ supp.pk }}" title="Delete Supplier">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="small text-muted mb-3">
+                    <div class="mb-1"><i class="fas fa-user-tie text-primary me-2"></i>{{ supp.contact_person|default:"General Depot Dispatch" }}</div>
+                    <div class="mb-1"><i class="fas fa-phone text-success me-2"></i><strong>{{ supp.phone }}</strong></div>
+                    {% if supp.email %}
+                    <div class="mb-1"><i class="fas fa-envelope text-info me-2"></i>{{ supp.email }}</div>
+                    {% endif %}
+                    {% if supp.address %}
+                    <div><i class="fas fa-location-dot text-danger me-2"></i>{{ supp.address }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-auto pt-2 border-top">
+                    <small class="text-muted d-block mb-1 text-uppercase" style="font-size: 0.68rem;">Catalog Lines Supplied ({{ supp.inventory_items.count }}):</small>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for inv in supp.inventory_items.all %}
+                        <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">
+                            {{ inv.product.name|truncatechars:28 }}
+                        </span>
+                        {% empty %}
+                        <span class="text-muted small fst-italic" style="font-size: 0.70rem;">No products linked yet</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="fas fa-truck-ramp-box fa-3x mb-2 opacity-50 d-block"></i>
+            No suppliers registered yet.
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- ═══════════════════════ NEW SUPPLIER MODAL ═══════════════════════ -->
+<div class="modal fade" id="newSupplierModal" tabindex="-1" aria-labelledby="newSupplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="newSupplierModalLabel">
+                    <i class="fas fa-truck-ramp-box me-2"></i> Register Commercial Supplier
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:suppliers' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Company / Distributor Name *</label>
+                        <input type="text" name="name" class="form-control form-control-sm" placeholder="e.g. Graphic Paper Converters Ltd" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Contact Person</label>
+                            <input type="text" name="contact_person" class="form-control form-control-sm" placeholder="e.g. Sales Director">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Phone Number *</label>
+                            <input type="text" name="phone" class="form-control form-control-sm" placeholder="+233 24 123 4567" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <input type="email" name="email" class="form-control form-control-sm" placeholder="orders@supplier.com">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Warehouse Depot / Facility Address</label>
+                        <textarea name="address" rows="2" class="form-control form-control-sm" placeholder="Plot / Bay / Street address..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold font-mono">
+                        <i class="fas fa-check me-1"></i> Save Supplier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ EDIT & DELETE MODALS ═══════════════════════ -->
+{% for supp in suppliers %}
+<!-- Edit Supplier Modal -->
+<div class="modal fade" id="editSupplierModal-{{ supp.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h6 class="modal-title fw-bold">
+                    <i class="fas fa-pencil me-2"></i> Edit Supplier: {{ supp.name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:edit_supplier' supp.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Company / Distributor Name *</label>
+                        <input type="text" name="name" value="{{ supp.name }}" class="form-control form-control-sm" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Contact Person</label>
+                            <input type="text" name="contact_person" value="{{ supp.contact_person }}" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Phone Number *</label>
+                            <input type="text" name="phone" value="{{ supp.phone }}" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <input type="email" name="email" value="{{ supp.email }}" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Warehouse Depot / Facility Address</label>
+                        <textarea name="address" rows="2" class="form-control form-control-sm">{{ supp.address }}</textarea>
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="activeSupp-{{ supp.pk }}" name="is_active" {% if supp.is_active %}checked{% endif %}>
+                        <label class="form-check-label small fw-bold" for="activeSupp-{{ supp.pk }}">Active Procurement Partner</label>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold font-mono">
+                        <i class="fas fa-save me-1"></i> Update Supplier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if is_ceo %}
+<!-- Delete Supplier Modal -->
+<div class="modal fade" id="deleteSupplierModal-{{ supp.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title fw-bold">
+                    <i class="fas fa-trash-can me-2"></i> Remove Supplier
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:delete_supplier' supp.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Are you sure you want to remove <strong>{{ supp.name }}</strong> from the procurement directory?</p>
+                    <div class="alert alert-warning small p-2 mb-0">
+                        <i class="fas fa-triangle-exclamation me-1"></i> Any inventory items associated with this supplier will remain in stock with supplier set to null.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold font-mono">
+                        <i class="fas fa-trash-can me-1"></i> Confirm Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

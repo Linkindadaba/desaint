@@ -15,9 +15,9 @@ from core.decorators import cashier_required
 def pos_terminal(request):
     """
     Sunyani Walk-in Store Point-of-Sale (POS) Terminal.
-    Optimized for fast counter sales with thermal receipt printing.
+    Optimized for fast counter sales with thermal receipt printing and live stock balances.
     """
-    products = Product.objects.filter(is_active=True).select_related('category')
+    products = Product.objects.filter(is_active=True).select_related('category').prefetch_related('inventory')
     categories = Category.objects.filter(is_active=True)
     recent_sales = POSSale.objects.all()[:8]
 
@@ -69,6 +69,30 @@ def pos_submit_sale(request):
             change_given=change_given,
             items_summary=json.dumps(items)
         )
+
+        # Deduct from Inventory with automatic break-bulk unboxing
+        for it in items:
+            raw_id = str(it.get('id', ''))
+            is_carton = raw_id.endswith('-whs')
+            clean_id = raw_id.replace('-whs', '').replace('-ret', '')
+            try:
+                prod_id = int(clean_id)
+            except (ValueError, TypeError):
+                continue
+
+            qty = int(it.get('qty', 1))
+            try:
+                from inventory.models import InventoryItem
+                inv_item = InventoryItem.objects.select_related('product').get(product_id=prod_id)
+                inv_item.fulfill_and_deduct(
+                    quantity=qty,
+                    is_carton=is_carton,
+                    user=request.user if request.user.is_authenticated else None,
+                    reference=receipt_num,
+                    note=f"POS counter receipt #{receipt_num} tendered by {cashier}."
+                )
+            except Exception:
+                pass
 
         return JsonResponse({
             'success': True,
@@ -203,6 +227,19 @@ def checkout(request):
                 unit_price=item['price'],
                 total_price=item['total_price']
             )
+            # Deduct from Inventory with automatic break-bulk unboxing
+            try:
+                from inventory.models import InventoryItem
+                inv_item = InventoryItem.objects.select_related('product').get(product_id=item['product'].id)
+                inv_item.fulfill_and_deduct(
+                    quantity=item['quantity'],
+                    is_carton=False,
+                    user=request.user if request.user.is_authenticated else None,
+                    reference=invoice_ref,
+                    note=f"Storefront Online Order {invoice_ref} ({client_name})."
+                )
+            except Exception:
+                pass
 
         cart.clear()
         messages.success(request, f"Order {invoice_ref} submitted successfully!")

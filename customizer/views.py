@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db.models import Sum, Q
 from decimal import Decimal
 import uuid
+
 from .models import RulingOption, CustomBookOrder
-from core.decorators import graphics_required
+from core.decorators import staff_required, ceo_required, graphics_required
+
 
 def configurator(request):
     """
@@ -121,3 +125,89 @@ def proof_approval(request):
     # Fallback to configurator if no order exists yet
     return redirect('customizer:configurator')
 
+
+@staff_required
+def order_list(request):
+    """
+    School Custom Book Orders & Printing Directory.
+    Enables Graphics Manager and Staff to oversee institutional print runs,
+    track digital proof approval signatures, and monitor manufacturing stages.
+    """
+    query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
+    orders_qs = CustomBookOrder.objects.select_related('ruling').all()
+
+    if query:
+        orders_qs = orders_qs.filter(
+            Q(order_ref__icontains=query) |
+            Q(school_name__icontains=query) |
+            Q(proprietor_name__icontains=query) |
+            Q(contact_phone__icontains=query) |
+            Q(delivery_location__icontains=query)
+        )
+
+    if status_filter:
+        orders_qs = orders_qs.filter(status=status_filter)
+
+    # Status counts & aggregations
+    all_orders = list(CustomBookOrder.objects.all())
+    total_orders = len(all_orders)
+    pending_proofs = sum(1 for o in all_orders if o.status == 'PROOF_PENDING')
+    in_production = sum(1 for o in all_orders if o.status in ['PROOF_APPROVED', 'PLATE_MAKING', 'PRINTING'])
+    completed_dispatched = sum(1 for o in all_orders if o.status in ['COMPLETED', 'DISPATCHED'])
+    total_copies = sum(o.quantity for o in all_orders)
+    total_value = sum(o.net_payable for o in all_orders)
+
+    context = {
+        'orders': orders_qs,
+        'query': query,
+        'selected_status': status_filter,
+        'total_orders': total_orders,
+        'pending_proofs': pending_proofs,
+        'in_production': in_production,
+        'completed_dispatched': completed_dispatched,
+        'total_copies': total_copies,
+        'total_value': total_value,
+        'status_choices': CustomBookOrder.STATUS_CHOICES,
+    }
+    return render(request, 'customizer/order_list.html', context)
+
+
+@staff_required
+@require_POST
+def order_status_update(request, pk):
+    """
+    Updates manufacturing stage, production notes, and status for a CustomBookOrder.
+    """
+    order = get_object_or_404(CustomBookOrder, pk=pk)
+    new_status = request.POST.get('status')
+    notes = request.POST.get('notes', '').strip()
+
+    if new_status in dict(CustomBookOrder.STATUS_CHOICES):
+        order.status = new_status
+        if new_status == 'PROOF_APPROVED' and not order.digital_proof_approved:
+            order.digital_proof_approved = True
+            order.approval_timestamp = timezone.now()
+            order.approved_by_signatory = order.approved_by_signatory or f"Staff Override ({request.user.username})"
+
+    if notes:
+        order.notes = notes
+
+    order.save()
+    messages.success(request, f"Order {order.order_ref} ({order.school_name}) updated to '{order.get_status_display()}'.")
+    return redirect('customizer:order_list')
+
+
+@ceo_required
+@require_POST
+def order_delete(request, pk):
+    """
+    Deletes a school custom book order. Restricted to CEO / Management.
+    """
+    order = get_object_or_404(CustomBookOrder, pk=pk)
+    ref = order.order_ref
+    school = order.school_name
+    order.delete()
+    messages.info(request, f"Order {ref} for '{school}' was deleted.")
+    return redirect('customizer:order_list')

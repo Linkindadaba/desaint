@@ -1,0 +1,416 @@
+{% extends 'base_admin.html' %}
+{% load static humanize %}
+
+{% block title %}Warehouse Stock Ledger & Reorder — {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+
+    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 font-mono small">
+                    <li class="breadcrumb-item"><a href="{% url 'inventory:dashboard' %}" class="text-decoration-none">Inventory</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Stock Ledger</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-0 text-dark">Sunyani Warehouse Stock Ledger</h3>
+            <p class="text-muted small mb-0">Live stock counts, break-bulk packaging ratios, and physical audit adjustments</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'inventory:movements' %}" class="btn btn-outline-secondary font-mono btn-sm">
+                <i class="fas fa-clock-rotate-left me-1"></i> Audit Trail
+            </a>
+            <a href="{% url 'inventory:suppliers' %}" class="btn btn-primary font-mono btn-sm">
+                <i class="fas fa-truck-ramp-box me-1"></i> Suppliers
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ SEARCH & FILTER BAR ═══════════════════════ -->
+    <div class="card border shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center font-mono">
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted border-end-0">
+                            <i class="fas fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control border-start-0" placeholder="Search product, SKU, supplier, bay...">
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">All Health Statuses</option>
+                        <option value="LOW" {% if status_filter == 'LOW' %}selected{% endif %}>Low Stock Only</option>
+                        <option value="OK" {% if status_filter == 'OK' %}selected{% endif %}>Healthy Stock</option>
+                        <option value="OUT" {% if status_filter == 'OUT' %}selected{% endif %}>Out of Stock</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark w-100">
+                        <i class="fas fa-filter me-1"></i> Filter
+                    </button>
+                    {% if query or selected_category or status_filter %}
+                    <a href="{% url 'inventory:ledger' %}" class="btn btn-sm btn-outline-secondary" title="Reset Filters">
+                        <i class="fas fa-xmark"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ LEDGER TABLE ═══════════════════════ -->
+    <div class="card border shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 font-mono small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product & SKU</th>
+                        <th>Supplier / Depot</th>
+                        <th>Packaging Ratio</th>
+                        <th class="text-center">Warehouse Bulk</th>
+                        <th class="text-center">Counter Shelf</th>
+                        <th class="text-center">Total Effective</th>
+                        <th class="text-end">Unit Cost</th>
+                        <th class="text-end">Cost Valuation</th>
+                        <th class="text-center">Health</th>
+                        <th class="text-end">Operations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded border p-1 bg-white" style="width: 40px; height: 40px; object-fit: contain;">
+                                {% else %}
+                                <div class="rounded border d-flex align-items-center justify-content-center bg-light" style="width: 40px; height: 40px;">
+                                    <i class="{{ item.product.icon_class }} text-primary"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-semibold text-dark">{{ item.product.name }}</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">
+                                        <span class="badge bg-light text-muted border">SKU: {{ item.product.sku }}</span>
+                                        <span class="ms-1"><i class="fas fa-location-dot me-1 text-danger"></i>{{ item.warehouse_location }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-dark">{{ item.supplier.name|default:"Desaint Internal Hub" }}</div>
+                            {% if item.supplier.phone %}
+                            <small class="text-muted" style="font-size: 0.70rem;">{{ item.supplier.phone }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                1 {{ item.bulk_unit_name }} = {{ item.pieces_per_carton }} {{ item.retail_unit_name }}s
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fs-6 fw-bold text-dark">{{ item.carton_stock }}</span>
+                            <span class="text-muted small d-block" style="font-size: 0.70rem;">{{ item.bulk_unit_name }}s</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fs-6 fw-bold text-primary">{{ item.loose_stock }}</span>
+                            <span class="text-muted small d-block" style="font-size: 0.70rem;">{{ item.retail_unit_name }}s</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold text-success">{{ item.total_retail_pieces|intcomma }}</span>
+                            <span class="text-muted small d-block" style="font-size: 0.70rem;">{{ item.retail_unit_name }}s</span>
+                        </td>
+                        <td class="text-end text-muted">
+                            GH₵ {{ item.cost_price|floatformat:2 }}
+                        </td>
+                        <td class="text-end fw-bold text-dark">
+                            GH₵ {{ item.total_cost_valuation|floatformat:2 }}
+                        </td>
+                        <td class="text-center">
+                            {% if item.is_low_stock %}
+                                <span class="badge bg-warning text-dark">LOW STOCK</span>
+                            {% elif item.total_retail_pieces == 0 %}
+                                <span class="badge bg-danger">OUT OF STOCK</span>
+                            {% else %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success">HEALTHY</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-success" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#restockModal{{ item.pk }}" 
+                                        title="Restock delivery from supplier">
+                                    <i class="fas fa-plus"></i> Restock
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#unboxModal{{ item.pk }}" 
+                                        title="Break-bulk unbox cartons into loose shelf units">
+                                    <i class="fas fa-box-open"></i> Unbox
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#adjustModal{{ item.pk }}" 
+                                        title="Physical count stocktake adjustment">
+                                    <i class="fas fa-scale-balanced"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-dark" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#configModal{{ item.pk }}" 
+                                        title="Packaging & Warehouse Settings">
+                                    <i class="fas fa-gear"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-2x mb-2 opacity-50 d-block"></i>
+                            No inventory items match your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- ═══════════════════════ OPERATIONAL ACTION MODALS ═══════════════════════ -->
+{% for item in items %}
+
+<!-- 1. Restock Modal -->
+<div class="modal fade" id="restockModal{{ item.pk }}" tabindex="-1" aria-labelledby="restockModalLabel{{ item.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content font-mono">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold" id="restockModalLabel{{ item.pk }}">
+                    <i class="fas fa-truck-ramp-box me-2"></i> Restock: {{ item.product.name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:restock' item.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-2 mb-3 rounded bg-light border small">
+                        <div><strong>SKU:</strong> {{ item.product.sku }}</div>
+                        <div><strong>Supplier:</strong> {{ item.supplier.name|default:"Desaint Internal Hub" }}</div>
+                        <div><strong>Current Balances:</strong> {{ item.carton_stock }} {{ item.bulk_unit_name }}s &bull; {{ item.loose_stock }} {{ item.retail_unit_name }}s</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Incoming {{ item.bulk_unit_name }}s (Cartons)</label>
+                            <input type="number" min="0" name="cartons" value="0" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Incoming Loose {{ item.retail_unit_name }}s</label>
+                            <input type="number" min="0" name="loose" value="0" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Unit Cost Price (GH₵)</label>
+                            <input type="number" step="0.01" min="0" name="cost_price" value="{{ item.cost_price }}" class="form-control form-control-sm">
+                            <small class="text-muted" style="font-size: 0.68rem;">Leave as-is to preserve current cost</small>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Waybill / Delivery Ref</label>
+                            <input type="text" name="reference" placeholder="e.g. WB-ACC-0492" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Delivery Notes & Vehicle Details</label>
+                        <textarea name="note" rows="2" class="form-control form-control-sm" placeholder="Received at Sunyani Hub bay..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-success fw-bold">
+                        <i class="fas fa-check me-1"></i> Receive & Restock
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Break-Bulk Unbox Modal -->
+<div class="modal fade" id="unboxModal{{ item.pk }}" tabindex="-1" aria-labelledby="unboxModalLabel{{ item.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content font-mono">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="unboxModalLabel{{ item.pk }}">
+                    <i class="fas fa-box-open me-2"></i> Break-Bulk Unbox: {{ item.product.name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:unbox' item.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-2 mb-3 rounded bg-light border small">
+                        <div><strong>Packaging Formula:</strong> 1 {{ item.bulk_unit_name }} = <strong class="text-primary">{{ item.pieces_per_carton }} {{ item.retail_unit_name }}s</strong></div>
+                        <div><strong>Sealed Cartons In Storage:</strong> {{ item.carton_stock }} {{ item.bulk_unit_name }}s</div>
+                        <div><strong>Loose Pieces On Counter:</strong> {{ item.loose_stock }} {{ item.retail_unit_name }}s</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Number of {{ item.bulk_unit_name }}s to Unbox:</label>
+                        <input type="number" min="1" max="{{ item.carton_stock }}" name="cartons_to_unbox" value="1" class="form-control" required>
+                        <small class="text-muted" style="font-size: 0.72rem;">Each carton opened converts into {{ item.pieces_per_carton }} loose shelf units.</small>
+                    </div>
+
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="fas fa-info-circle me-1"></i> Unboxing decrements warehouse carton count and increments shelf pieces with an immutable audit log.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold" {% if item.carton_stock == 0 %}disabled{% endif %}>
+                        <i class="fas fa-scissors me-1"></i> Open & Replenish Shelf
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Physical Stocktake Reconcile Modal -->
+<div class="modal fade" id="adjustModal{{ item.pk }}" tabindex="-1" aria-labelledby="adjustModalLabel{{ item.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content font-mono">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold" id="adjustModalLabel{{ item.pk }}">
+                    <i class="fas fa-scale-balanced me-2"></i> Physical Count Audit: {{ item.product.name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:adjust' item.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="p-2 mb-3 rounded bg-light border small">
+                        <div><strong>System Registered Balance:</strong> {{ item.carton_stock }} {{ item.bulk_unit_name }}s + {{ item.loose_stock }} {{ item.retail_unit_name }}s</div>
+                        <div class="text-muted" style="font-size: 0.70rem;">Location: {{ item.warehouse_location }}</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Actual Counted {{ item.bulk_unit_name }}s</label>
+                            <input type="number" min="0" name="new_cartons" value="{{ item.carton_stock }}" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Actual Counted Loose Units</label>
+                            <input type="number" min="0" name="new_loose" value="{{ item.loose_stock }}" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Audit Reason / Discrepancy Note</label>
+                        <select name="reason" class="form-select form-select-sm mb-2">
+                            <option value="Physical Stocktake Audit">Routine Physical Stocktake Audit</option>
+                            <option value="Damaged Stock Written Off">Damaged Stock Written Off</option>
+                            <option value="Discovered Uncounted Cartons">Discovered Uncounted Cartons</option>
+                            <option value="Cashier Till Balance Reconciliation">Cashier Till Balance Reconciliation</option>
+                        </select>
+                        <textarea name="note" rows="2" class="form-control form-control-sm" placeholder="Additional audit details or supervisor sign-off..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-dark fw-bold">
+                        <i class="fas fa-check-double me-1"></i> Save Audit Adjustment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Configuration & Packaging Modal -->
+<div class="modal fade" id="configModal{{ item.pk }}" tabindex="-1" aria-labelledby="configModalLabel{{ item.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered font-mono">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title fw-bold" id="configModalLabel{{ item.pk }}">
+                    <i class="fas fa-gear me-2"></i> Inventory Settings: {{ item.product.name }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:edit_config' item.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Primary Supplier / Converter</label>
+                        <select name="supplier_id" class="form-select form-select-sm">
+                            <option value="">No Supplier Assigned</option>
+                            {% for supp in suppliers %}
+                            <option value="{{ supp.id }}" {% if item.supplier_id == supp.id %}selected{% endif %}>{{ supp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Landed Unit Cost (GH₵)</label>
+                            <input type="number" step="0.01" min="0" name="cost_price" value="{{ item.cost_price }}" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Pieces per Bulk Carton</label>
+                            <input type="number" min="1" name="pieces_per_carton" value="{{ item.pieces_per_carton }}" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Bulk Unit Name</label>
+                            <input type="text" name="bulk_unit_name" value="{{ item.bulk_unit_name }}" class="form-control form-control-sm" placeholder="Carton, Box">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Retail Unit Name</label>
+                            <input type="text" name="retail_unit_name" value="{{ item.retail_unit_name }}" class="form-control form-control-sm" placeholder="Piece, Book">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Reorder Alert (Cartons)</label>
+                            <input type="number" min="0" name="low_stock_threshold_cartons" value="{{ item.low_stock_threshold_cartons }}" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Warehouse Storage Bay</label>
+                            <input type="text" name="warehouse_location" value="{{ item.warehouse_location }}" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                        <i class="fas fa-save me-1"></i> Update Configuration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+{% endblock %}

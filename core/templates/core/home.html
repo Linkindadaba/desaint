@@ -152,17 +152,26 @@
         {% for p in products %}
             <div class="col-6 col-md-4 col-lg-3">
                 <div class="product-card">
-                    <div class="product-thumbnail-frame">
-                        <i class="{{ p.icon_class }} fa-3x"></i>
+                    <div class="product-thumbnail-frame" role="button" data-bs-toggle="modal" data-bs-target="#productModal-{{ p.id }}" style="cursor: pointer;">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">
+                        {% else %}
+                            <i class="{{ p.icon_class }} fa-3x"></i>
+                        {% endif %}
                         <div style="position: absolute; top: 8px; left: 8px;">
                             <span class="{{ p.stock_badge_class }}">
                                 <i class="fas fa-circle-check me-1"></i>{{ p.get_stock_status_display }}
                             </span>
                         </div>
+                        <div style="position: absolute; bottom: 8px; right: 8px;">
+                            <span class="badge bg-dark bg-opacity-75 text-white" style="font-size: 0.65rem;" title="View Specifications">
+                                <i class="fas fa-eye me-1"></i>Specs
+                            </span>
+                        </div>
                     </div>
                     <div class="product-card-body">
                         <span class="text-muted text-uppercase font-mono" style="font-size: 0.65rem;">{{ p.category.name }}</span>
-                        <h3 class="product-title" title="{{ p.name }}">{{ p.name }}</h3>
+                        <h3 class="product-title" role="button" data-bs-toggle="modal" data-bs-target="#productModal-{{ p.id }}" style="cursor: pointer;" title="{{ p.name }}">{{ p.name }}</h3>
                         <div class="product-price-box">
                             <div class="product-price-retail font-mono">GH₵ {{ p.retail_price }}</div>
                             <div class="product-price-wholesale font-mono">Wholesale: GH₵ {{ p.wholesale_price }} ({{ p.wholesale_box_size }})</div>
@@ -241,4 +250,83 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+{% for p in products %}
+<div class="modal fade" id="productModal-{{ p.id }}" tabindex="-1" aria-labelledby="productModalLabel-{{ p.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg font-sans">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-primary border font-mono small">{{ p.category.name }}</span>
+                    <span class="badge bg-secondary font-mono small">SKU: {{ p.sku }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-5">
+                        <div class="rounded-3 border p-3 bg-light d-flex align-items-center justify-content-center" style="aspect-ratio: 1 / 1;">
+                            {% if p.image %}
+                            <img src="{{ p.image.url }}" alt="{{ p.name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                            {% else %}
+                            <i class="{{ p.icon_class }} fa-5x text-secondary opacity-50"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold text-dark mb-2">{{ p.name }}</h4>
+                        
+                        <div class="d-flex flex-wrap align-items-baseline gap-3 mb-3">
+                            <div>
+                                <span class="text-muted small d-block">Retail Counter Price</span>
+                                <span class="fs-4 fw-bold font-mono text-danger">GH₵ {{ p.retail_price }}</span>
+                                <small class="text-muted">/ unit</small>
+                            </div>
+                            <div class="border-start ps-3">
+                                <span class="text-muted small d-block">B2B Wholesale Packaging</span>
+                                <span class="fs-5 fw-bold font-mono text-primary">GH₵ {{ p.wholesale_price }}</span>
+                                <small class="text-muted font-mono d-block" style="font-size: 0.72rem;">{{ p.wholesale_box_size }}</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="{{ p.stock_badge_class }}">
+                                <i class="fas fa-circle-check me-1"></i>{{ p.get_stock_status_display }}
+                            </span>
+                            {% if p.is_customizable %}
+                            <span class="badge bg-warning text-dark border ms-1 font-mono">
+                                <i class="fas fa-pen-nib me-1"></i>Custom School Crests Allowed
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if p.description %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold small text-uppercase text-muted font-mono mb-1">Specifications & Description:</h6>
+                            <p class="text-secondary small mb-0" style="line-height: 1.6;">{{ p.description }}</p>
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'orders_public:cart_add' p.id %}">
+                            {% csrf_token %}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <label class="small fw-bold font-mono text-muted">Quantity:</label>
+                                <input type="number" name="quantity" value="1" min="1" max="1000" class="form-control form-control-sm font-mono text-center" style="width: 80px;">
+                                <button type="submit" class="btn btn-primary font-mono btn-sm px-4 fw-bold">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Order
+                                </button>
+                            </div>
+                            <small class="text-muted font-mono" style="font-size: 0.7rem;">
+                                <i class="fas fa-truck-fast me-1 text-info"></i> Direct factory dispatch from Sunyani Central Hub
+                            </small>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

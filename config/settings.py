@@ -31,10 +31,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     # Desaint Stationeries Core & Modules
     'core',
     'catalog',
+    'inventory',
     'customizer',
     'orders',
     'invoices',

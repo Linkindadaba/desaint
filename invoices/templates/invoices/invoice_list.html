@@ -1,0 +1,487 @@
+{% extends "base_admin.html" %}
+{% load humanize %}
+
+{% block title %}Commercial Invoicing & GRA Proforma Ledger — {{ BRAND_NAME }}{% endblock %}
+
+{% block page_title %}Invoices &bull; GRA Proforma Commercial Ledger{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold m-0" style="color: var(--cv-primary);">Commercial Invoices & GRA Proforma Ledger</h4>
+        <small class="text-muted">Statutory Act 896 compliance, institutional 3% WHT tracking, and corporate billing.</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'invoices:sample' %}" class="btn btn-sm btn-outline-secondary font-mono">
+            <i class="fas fa-eye me-1"></i> Preview Sample A4
+        </a>
+        <button class="btn btn-sm btn-primary font-mono" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
+            <i class="fas fa-file-circle-plus me-1"></i> Issue New Proforma / Invoice
+        </button>
+    </div>
+</div>
+
+<!-- FINANCIAL KPI CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3">
+            <span class="text-muted text-uppercase font-mono small">Total Value Invoiced</span>
+            <h3 class="font-mono fw-bold text-dark my-1">GH₵ {{ total_invoiced|floatformat:2|intcomma }}</h3>
+            <small class="text-muted">Cumulative Commercial Billing</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3">
+            <span class="text-muted text-uppercase font-mono small">Payments Collected</span>
+            <h3 class="font-mono fw-bold text-success my-1">GH₵ {{ total_paid|floatformat:2|intcomma }}</h3>
+            <small class="text-success font-mono">Settled Transactions</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3">
+            <span class="text-muted text-uppercase font-mono small">Outstanding Receivables</span>
+            <h3 class="font-mono fw-bold text-danger my-1">GH₵ {{ total_outstanding|floatformat:2|intcomma }}</h3>
+            <small class="text-danger font-mono">Pending Institutional Settlement</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="cv-card p-3">
+            <span class="text-muted text-uppercase font-mono small">Statutory 3% WHT Deducted</span>
+            <h3 class="font-mono fw-bold text-info my-1">GH₵ {{ total_wht_withheld|floatformat:2|intcomma }}</h3>
+            <small class="text-muted font-mono">Act 896 Certificates to Remit</small>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER & SEARCH BAR -->
+<div class="cv-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" value="{{ query }}" class="form-control form-control-sm font-mono border-start-0" placeholder="Search by client, invoice number, TIN...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="type" class="form-select form-select-sm font-mono" onchange="this.form.submit()">
+                <option value="">All Document Types</option>
+                {% for key, val in invoice_types %}
+                <option value="{{ key }}" {% if selected_type == key %}selected{% endif %}>{{ val }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select form-select-sm font-mono" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>Paid / Settled</option>
+                <option value="unpaid" {% if selected_status == 'unpaid' %}selected{% endif %}>Pending / Unpaid</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary font-mono w-100">
+                <i class="fas fa-filter me-1"></i> Filter
+            </button>
+            {% if query or selected_type or selected_status %}
+            <a href="{% url 'invoices:invoice_list' %}" class="btn btn-sm btn-outline-secondary font-mono" title="Reset">
+                <i class="fas fa-rotate-left"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- INVOICES TABLE -->
+<div class="cv-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold m-0" style="color: var(--cv-primary);">
+            <i class="fas fa-file-invoice-dollar me-2"></i> Invoices & Billing Records
+        </h5>
+        <span class="badge bg-secondary font-mono">{{ invoices.count }} record{{ invoices.count|pluralize }}</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle font-mono small">
+            <thead class="table-light">
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Date</th>
+                    <th>Client / School & TIN</th>
+                    <th>Type</th>
+                    <th>Tax Regime</th>
+                    <th class="text-end">Subtotal</th>
+                    <th class="text-end">WHT / Tax</th>
+                    <th class="text-end">Total Payable</th>
+                    <th>Payment</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td>
+                        <a href="{% url 'invoices:proforma' inv.pk %}" class="fw-bold text-primary text-decoration-none">
+                            {{ inv.invoice_number }}
+                        </a>
+                    </td>
+                    <td class="text-muted" style="font-size: 0.75rem;">
+                        {{ inv.created_at|date:"d M Y" }}
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark font-sans" style="font-size: 0.85rem;">{{ inv.client_name }}</div>
+                        {% if inv.client_tin %}
+                        <span class="badge bg-light text-secondary border font-mono" style="font-size: 0.68rem;">TIN: {{ inv.client_tin }}</span>
+                        {% endif %}
+                        {% if inv.client_phone %}
+                        <span class="text-muted ms-1" style="font-size: 0.72rem;"><i class="fas fa-phone fa-xs me-1"></i>{{ inv.client_phone }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if 'PROFORMA' in inv.invoice_type %}
+                        <span class="badge bg-info text-dark">Institutional Proforma</span>
+                        {% elif 'WHOLESALE' in inv.invoice_type %}
+                        <span class="badge bg-primary">Wholesale B2B</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Retail Counter</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if inv.tax_mode == 'INSTITUTIONAL_WHT_3PCT' %}
+                        <span class="badge bg-warning text-dark border">Act 896 3% WHT</span>
+                        {% elif inv.tax_mode == 'GRA_STANDARD_VAT' %}
+                        <span class="badge bg-dark">GRA Standard VAT</span>
+                        {% else %}
+                        <span class="badge bg-light text-muted border">Net Retail</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end text-muted">
+                        GH₵ {{ inv.subtotal|floatformat:2|intcomma }}
+                    </td>
+                    <td class="text-end">
+                        {% if inv.wht_amount > 0 %}
+                        <span class="text-danger fw-bold">-GH₵ {{ inv.wht_amount|floatformat:2|intcomma }}</span>
+                        {% elif inv.vat_amount > 0 %}
+                        <span class="text-info fw-bold">+GH₵ {{ inv.vat_amount|floatformat:2|intcomma }}</span>
+                        {% else %}
+                        <span class="text-muted">GH₵ 0.00</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end fw-bold text-dark" style="font-size: 0.95rem;">
+                        GH₵ {{ inv.total_payable|floatformat:2|intcomma }}
+                    </td>
+                    <td>
+                        {% if inv.is_paid %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Paid</span>
+                        {% if inv.payment_reference %}
+                        <div class="text-muted font-mono" style="font-size: 0.65rem;">Ref: {{ inv.payment_reference }}</div>
+                        {% endif %}
+                        {% else %}
+                        <span class="badge bg-danger"><i class="fas fa-hourglass-half me-1"></i>Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'invoices:proforma' inv.pk %}" class="btn btn-outline-primary" title="View / Print A4 Proforma">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            {% if not inv.is_paid %}
+                            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#payModal-{{ inv.pk }}" title="Record Settlement">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </button>
+                            {% endif %}
+                            {% if is_ceo %}
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ inv.pk }}" title="Delete Invoice">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="fas fa-file-invoice fa-3x mb-3 text-secondary opacity-50"></i>
+                        <p class="m-0">No invoices or proformas found.</p>
+                        <button class="btn btn-sm btn-primary font-mono mt-3" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
+                            <i class="fas fa-file-circle-plus me-1"></i> Issue First Invoice
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<!-- ─── ISSUE NEW INVOICE MODAL ────────────────────────────────────────────── -->
+<div class="modal fade" id="newInvoiceModal" tabindex="-1" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="newInvoiceModalLabel">
+                    <i class="fas fa-file-circle-plus me-2"></i> Issue Commercial Invoice / Statutory Proforma
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'invoices:invoice_create' %}" method="post" id="invoiceForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Client Details -->
+                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        <i class="fas fa-building-columns me-1"></i> Client & Tax Regime
+                    </h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Client / Institution Name *</label>
+                            <input type="text" name="client_name" class="form-control form-control-sm" placeholder="e.g. St. James Seminary Senior High" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" name="client_phone" class="form-control form-control-sm" placeholder="024 400 1122">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">GRA TIN (If applicable)</label>
+                            <input type="text" name="client_tin" class="form-control form-control-sm font-mono" placeholder="P0018924401">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Document Type</label>
+                            <select name="invoice_type" class="form-select form-select-sm font-mono">
+                                <option value="INSTITUTIONAL_PROFORMA">Institutional Proforma</option>
+                                <option value="WHOLESALE_INVOICE">B2B Wholesale Commercial Invoice</option>
+                                <option value="RETAIL_RECEIPT">Counter Retail Receipt</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Tax Mode</label>
+                            <select name="tax_mode" id="taxModeSelect" class="form-select form-select-sm font-mono" onchange="calculateInvoiceTotals()">
+                                <option value="INSTITUTIONAL_WHT_3PCT" selected>Act 896 3% WHT Deducted (Institutional)</option>
+                                <option value="GRA_STANDARD_VAT">GRA Standard VAT (21%)</option>
+                                <option value="RETAIL_NET">Net Flat (No Tax)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Payment Method</label>
+                            <select name="payment_method" class="form-select form-select-sm font-mono">
+                                <option value="BANK_TRANSFER" selected>GCB / Bank Transfer</option>
+                                <option value="MOMO_TILL">MTN Mobile Money Till</option>
+                                <option value="CASH">Cash Counter</option>
+                                <option value="TERM_CREDIT">Institutional Term Credit (30-Day)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Line Items Table -->
+                    <h6 class="fw-bold text-primary mb-2 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-list me-1"></i> Order Line Items</span>
+                        <button type="button" class="btn btn-xs btn-outline-primary font-mono" onclick="addLineItem()">
+                            <i class="fas fa-plus me-1"></i> Add Line
+                        </button>
+                    </h6>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered table-sm font-mono small" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Description *</th>
+                                    <th style="width: 100px;">Qty *</th>
+                                    <th style="width: 140px;">Unit Price (GH₵) *</th>
+                                    <th style="width: 140px;" class="text-end">Line Total</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTableBody">
+                                <tr>
+                                    <td>
+                                        <input type="text" name="item_description[]" class="form-control form-control-sm" placeholder="e.g. Custom Exercise Books 80pg Single Line" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" min="1" value="1000" name="item_quantity[]" class="form-control form-control-sm item-qty font-mono" oninput="calculateInvoiceTotals()" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" value="3.20" name="item_unit_price[]" class="form-control form-control-sm item-price font-mono" oninput="calculateInvoiceTotals()" required>
+                                    </td>
+                                    <td class="text-end fw-bold align-middle line-total">GH₵ 3,200.00</td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeLineItem(this)"><i class="fas fa-times"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Financial Summary Breakdown -->
+                    <div class="row justify-content-end mb-3 font-mono small">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between py-1 border-bottom">
+                                <span class="text-muted">Gross Subtotal:</span>
+                                <span class="fw-bold" id="summarySubtotal">GH₵ 3,200.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1 border-bottom" id="taxRow">
+                                <span class="text-muted" id="taxLabel">Ghana Act 896 3% WHT:</span>
+                                <span class="fw-bold text-danger" id="summaryTax">-GH₵ 96.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom bg-light px-2 rounded">
+                                <span class="fw-bold text-dark">Net Payable Amount:</span>
+                                <span class="fw-bold text-primary fs-6" id="summaryPayable">GH₵ 3,104.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Commercial Terms & Instructions</label>
+                        <textarea name="notes" rows="2" class="form-control form-control-sm" placeholder="Delivery schedule, bank details, 3% withholding certificate remit notice..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold font-mono">
+                        <i class="fas fa-check me-1"></i> Generate & Open Proforma
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ─── RECORD PAYMENT & DELETE MODALS ────────────────────────────────────── -->
+{% for inv in invoices %}
+{% if not inv.is_paid %}
+<div class="modal fade" id="payModal-{{ inv.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title fw-bold">
+                    <i class="fas fa-money-bill-wave me-2"></i> Record Payment: {{ inv.invoice_number }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'invoices:mark_paid' inv.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="mb-2">Client: <strong>{{ inv.client_name }}</strong></p>
+                    <p class="mb-3">Payable Amount: <strong class="text-success font-mono fs-5">GH₵ {{ inv.total_payable|floatformat:2|intcomma }}</strong></p>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Payment Reference / Transaction ID *</label>
+                        <input type="text" name="payment_reference" class="form-control form-control-sm font-mono" placeholder="e.g. GCB-TRX-98124 or MTN-MOMO-098" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-success fw-bold font-mono">
+                        <i class="fas fa-check me-1"></i> Confirm Paid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if is_ceo %}
+<div class="modal fade" id="deleteModal-{{ inv.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title fw-bold">
+                    <i class="fas fa-trash-can me-2"></i> Delete Invoice {{ inv.invoice_number }}
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'invoices:delete' inv.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Are you sure you want to delete invoice <strong>{{ inv.invoice_number }}</strong> issued to <strong>{{ inv.client_name }}</strong>?</p>
+                    <div class="alert alert-warning small p-2 mb-0">
+                        <i class="fas fa-triangle-exclamation me-1"></i> This will permanently remove the invoice and its itemized line entries.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold font-mono">
+                        <i class="fas fa-trash-can me-1"></i> Confirm Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<script>
+function addLineItem() {
+    const tbody = document.getElementById('itemsTableBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" name="item_description[]" class="form-control form-control-sm" placeholder="Item description" required></td>
+        <td><input type="number" min="1" value="100" name="item_quantity[]" class="form-control form-control-sm item-qty font-mono" oninput="calculateInvoiceTotals()" required></td>
+        <td><input type="number" step="0.01" min="0" value="5.00" name="item_unit_price[]" class="form-control form-control-sm item-price font-mono" oninput="calculateInvoiceTotals()" required></td>
+        <td class="text-end fw-bold align-middle line-total">GH₵ 500.00</td>
+        <td class="text-center align-middle">
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeLineItem(this)"><i class="fas fa-times"></i></button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    calculateInvoiceTotals();
+}
+
+function removeLineItem(btn) {
+    const tbody = document.getElementById('itemsTableBody');
+    if (tbody.querySelectorAll('tr').length > 1) {
+        btn.closest('tr').remove();
+        calculateInvoiceTotals();
+    } else {
+        alert("At least one line item is required.");
+    }
+}
+
+function calculateInvoiceTotals() {
+    const rows = document.querySelectorAll('#itemsTableBody tr');
+    let subtotal = 0;
+
+    rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const lineTotal = qty * price;
+        row.querySelector('.line-total').textContent = 'GH₵ ' + lineTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        subtotal += lineTotal;
+    });
+
+    const taxMode = document.getElementById('taxModeSelect').value;
+    const summarySubtotal = document.getElementById('summarySubtotal');
+    const summaryTax = document.getElementById('summaryTax');
+    const taxLabel = document.getElementById('taxLabel');
+    const summaryPayable = document.getElementById('summaryPayable');
+
+    summarySubtotal.textContent = 'GH₵ ' + subtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+    let taxAmount = 0;
+    let payable = subtotal;
+
+    if (taxMode === 'INSTITUTIONAL_WHT_3PCT') {
+        taxAmount = subtotal * 0.03;
+        payable = subtotal - taxAmount;
+        taxLabel.textContent = 'Ghana Act 896 3% WHT:';
+        summaryTax.textContent = '-GH₵ ' + taxAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        summaryTax.className = 'fw-bold text-danger';
+    } else if (taxMode === 'GRA_STANDARD_VAT') {
+        taxAmount = subtotal * 0.21;
+        payable = subtotal + taxAmount;
+        taxLabel.textContent = 'GRA Standard VAT (21%):';
+        summaryTax.textContent = '+GH₵ ' + taxAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        summaryTax.className = 'fw-bold text-info';
+    } else {
+        taxLabel.textContent = 'Tax:';
+        summaryTax.textContent = 'GH₵ 0.00';
+        summaryTax.className = 'fw-bold text-muted';
+    }
+
+    summaryPayable.textContent = 'GH₵ ' + payable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+</script>
+{% endblock %}

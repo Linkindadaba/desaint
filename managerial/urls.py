@@ -14,6 +14,9 @@ urlpatterns = [
 
     # ─── CEO-Only Sections ─────────────────────────────────────────────────
     path('credit-ledger/', views.credit_ledger, name='credit_ledger'),
+    path('credit/create/', views.create_credit_record, name='create_credit_record'),
+    path('credit/<int:pk>/edit/', views.edit_credit_record, name='edit_credit_record'),
+    path('credit/<int:pk>/delete/', views.delete_credit_record, name='delete_credit_record'),
     path('credit/payment/', views.record_payment, name='record_payment_general'),
     path('credit/payment/<int:pk>/', views.record_payment, name='record_payment'),
 
@@ -32,4 +35,6 @@ urlpatterns = [
     # ─── Logistics Sections ────────────────────────────────────────────────
     path('waybills/', views.waybills, name='waybills'),
     path('waybills/create/', views.create_waybill, name='create_waybill'),
+    path('waybills/<int:pk>/update-status/', views.update_waybill_status, name='update_waybill_status'),
+    path('waybills/<int:pk>/delete/', views.delete_waybill, name='delete_waybill'),
 ]

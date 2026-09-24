@@ -87,7 +87,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="{% url 'invoices:sample' %}"
+                <a href="{% url 'invoices:invoice_list' %}"
                    class="nav-link sidebar-link {% if request.resolver_match.app_name == 'invoices' %}active{% endif %}">
                     <i class="fas fa-file-lines fa-fw me-2 text-info"></i> GRA Proforma Invoices
                 </a>
@@ -143,9 +143,9 @@
             </li>
 
             <li class="nav-item">
-                <a href="{% url 'customizer:proof_sample' %}"
-                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if 'proof' in request.resolver_match.url_name %}active{% endif %}">
-                    <span><i class="fas fa-file-signature fa-fw me-2 text-warning"></i> Digital Proof Sign-off</span>
+                <a href="{% url 'customizer:order_list' %}"
+                   class="nav-link sidebar-link d-flex justify-content-between align-items-center {% if request.resolver_match.app_name == 'customizer' and request.resolver_match.url_name == 'order_list' %}active{% endif %}">
+                    <span><i class="fas fa-file-signature fa-fw me-2 text-warning"></i> Print Orders & Proofs</span>
                     {% if pending_proofs_count > 0 %}
                     <span class="badge bg-warning text-dark rounded-pill px-1" style="font-size: 0.65rem;" title="{{ pending_proofs_count }} awaiting approval">
                         {{ pending_proofs_count }}
@@ -170,6 +170,53 @@
                         {{ waybills_in_transit_count }}
                     </span>
                     {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- ─── Catalog & Merchandising ─────────────────────────────── -->
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">Catalog & Products</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'catalog:product_list' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'catalog' %}active{% endif %}">
+                    <i class="fas fa-tags fa-fw me-2 text-primary"></i> Product Catalog Directory
+                </a>
+            </li>
+
+            <!-- ─── Inventory & Warehouse ─────────────────────────────── -->
+            {% if is_ceo or is_logistics or is_cashier %}
+            <li class="nav-item mt-2">
+                <small class="sidebar-section-label px-2 text-uppercase font-mono" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1px;">Inventory & Warehouse</small>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'inventory:dashboard' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'inventory' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-boxes-stacked fa-fw me-2 text-success"></i> Stock Dashboard
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'inventory:ledger' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'inventory' and request.resolver_match.url_name == 'ledger' %}active{% endif %}">
+                    <i class="fas fa-warehouse fa-fw me-2 text-info"></i> Warehouse Stock Ledger
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'inventory:movements' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'inventory' and request.resolver_match.url_name == 'movements' %}active{% endif %}">
+                    <i class="fas fa-clock-rotate-left fa-fw me-2 text-warning"></i> Movements Audit Log
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'inventory:suppliers' %}"
+                   class="nav-link sidebar-link {% if request.resolver_match.app_name == 'inventory' and request.resolver_match.url_name == 'suppliers' %}active{% endif %}">
+                    <i class="fas fa-truck-ramp-box fa-fw me-2 text-primary"></i> Suppliers & Sources
                 </a>
             </li>
             {% endif %}
