@@ -39,6 +39,7 @@ media/proofs/*
 Thumbs.db
 
 # Static collection & Vendor source
-staticfiles/
+staticfiles/*
+!staticfiles/.gitkeep
 bootstrap-5.3.3/
 
