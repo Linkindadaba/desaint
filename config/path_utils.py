@@ -10,7 +10,7 @@ def normalize_wsgi_path(environ):
             raw_captured_path = parsed_qs.pop('__path__')[0]
             clean_path = '/' + raw_captured_path.lstrip('/')
             
-            if clean_path in ('/api/index.py', '/api/index', '/api'):
+            if clean_path in ('/api/index.py', '/api/index', '/api', '/api/index.py/', '/wsgi.py', '/wsgi'):
                 clean_path = '/'
                 
             environ['PATH_INFO'] = clean_path or '/'
@@ -27,7 +27,7 @@ def normalize_wsgi_path(environ):
         'RAW_URI',
     ):
         header_val = environ.get(header_key)
-        if header_val and not header_val.startswith('/api/index'):
+        if header_val and not header_val.startswith(('/api/index', '/wsgi')):
             orig_path = header_val.split('?')[0]
             if orig_path:
                 environ['PATH_INFO'] = '/' + orig_path.lstrip('/')
@@ -35,5 +35,9 @@ def normalize_wsgi_path(environ):
 
     # 3. Fallback root
     current_path = environ.get('PATH_INFO', '')
-    if current_path in ('/api/index.py', '/api/index', '/api', '/api/index.py/'):
+    if current_path in ('/api/index.py', '/api/index', '/api', '/api/index.py/', '/wsgi.py', '/wsgi'):
         environ['PATH_INFO'] = '/'
+    elif current_path.startswith('/api/index.py/'):
+        environ['PATH_INFO'] = current_path[len('/api/index.py'):]
+    elif current_path.startswith('/wsgi.py/'):
+        environ['PATH_INFO'] = current_path[len('/wsgi.py'):]
