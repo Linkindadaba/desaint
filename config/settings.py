@@ -31,6 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
     'https://*.now.sh',
     'https://*.desaintstationeries.com',
+    'https://desaintstationeries.com',
     'http://127.0.0.1',
     'http://localhost',
 ]
@@ -166,10 +167,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Session & Authentication Security Settings
-# Prevents automatic logins by expiring sessions upon browser close and limiting idle lifetime
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 3600  # 1 hour maximum idle session timeout
-SESSION_SAVE_EVERY_REQUEST = False  # Avoid sliding session indefinitely
+# Proxy & HTTPS Forwarding Settings for Vercel Edge
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
+# Session & Authentication Settings
+# Uses cryptographically signed cookies for serverless multi-container stateless sessions
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 86400 * 7  # 7-day session validity
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing session cookie
 SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+LOGIN_URL = 'managerial:staff_login'
+LOGIN_REDIRECT_URL = 'managerial:dashboard'
