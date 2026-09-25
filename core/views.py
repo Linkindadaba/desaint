@@ -8,8 +8,18 @@ def home(request):
     Features distinctive educational supply branding, 5k-10k custom book highlights,
     corporate citations, and 2-column mobile catalog.
     """
-    products = Product.objects.filter(is_active=True).select_related('category')
-    categories = Category.objects.filter(is_active=True)
+    try:
+        products = list(Product.objects.filter(is_active=True).select_related('category'))
+        categories = list(Category.objects.filter(is_active=True))
+    except Exception:
+        try:
+            from config.db_init import initialize_database
+            initialize_database()
+            products = list(Product.objects.filter(is_active=True).select_related('category'))
+            categories = list(Category.objects.filter(is_active=True))
+        except Exception:
+            products = []
+            categories = []
 
     # Core corporate highlights
     citations_data = [

@@ -87,7 +87,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database Configuration
-IS_VERCEL = 'VERCEL' in os.environ or 'AWS_LAMBDA_FUNCTION_NAME' in os.environ
+IS_VERCEL = bool(
+    'VERCEL' in os.environ or
+    'AWS_LAMBDA_FUNCTION_NAME' in os.environ or
+    'VERCEL_ENV' in os.environ or
+    'VERCEL_REGION' in os.environ or
+    'VERCEL_URL' in os.environ
+)
+
 DATABASE_URL = (os.getenv('DATABASE_URL') or '').strip()
 
 if DATABASE_URL:
@@ -104,6 +111,12 @@ if DATABASE_URL:
             }
         }
 elif IS_VERCEL:
+    try:
+        from config.db_init import initialize_database
+        initialize_database()
+    except Exception as e:
+        print(f"Settings DB Init Notice: {e}")
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
