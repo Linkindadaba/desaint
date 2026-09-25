@@ -13,7 +13,8 @@ admin.site.index_title = "Commercial Operations & Managerial ERP"
 
 urlpatterns = [
     # ─── Django Raw Database Admin ────────────────────────────────────────
-    path('admin/django/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
+    path('admin/django/', RedirectView.as_view(url='/django-admin/', permanent=False)),
 
     # ─── Staff Management Portal (Unified /admin/ prefix) ─────────────────
     # Auth endpoints (login / logout)
