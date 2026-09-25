@@ -25,6 +25,12 @@ def app(environ, start_response):
     """
     WSGI wrapper for Vercel Serverless Function runtime.
     """
+    try:
+        from config.db_init import initialize_database
+        initialize_database()
+    except Exception:
+        pass
+
     normalize_wsgi_path(environ)
     return _django_application(environ, start_response)
 

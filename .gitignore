@@ -13,10 +13,10 @@ venv.bak/
 dj-env/
 myvenv/
 
-# Database
-*.sqlite3
+# Database Journal files (keep db.sqlite3 tracked for serverless cold-start seeding)
 *.sqlite3-journal
-db.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
 
 # Media & Uploads
 media/uploads/*
@@ -42,4 +42,3 @@ Thumbs.db
 staticfiles/*
 !staticfiles/.gitkeep
 bootstrap-5.3.3/
-
