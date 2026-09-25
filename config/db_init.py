@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import sqlite3
 from pathlib import Path
@@ -56,10 +57,10 @@ def initialize_database():
                         except Exception:
                             pass
                     shutil.copyfile(candidate, tmp_db)
-                    print(f"Initialized /tmp/db.sqlite3 from {candidate}")
+                    sys.stderr.write(f"Initialized /tmp/db.sqlite3 from {candidate}\n")
                     return
                 except Exception as e:
-                    print(f"Notice: Copy db from {candidate} failed: {e}")
+                    sys.stderr.write(f"Notice: Copy db from {candidate} failed: {e}\n")
 
         # 2. Fallback: Run migrations and seed data programmatically
         try:
@@ -71,6 +72,6 @@ def initialize_database():
                 import seed_initial_data
                 seed_initial_data.seed_data()
             except Exception as se:
-                print(f"Seed note: {se}")
+                sys.stderr.write(f"Seed note: {se}\n")
         except Exception as me:
-            print(f"Migrate note: {me}")
+            sys.stderr.write(f"Migrate note: {me}\n")

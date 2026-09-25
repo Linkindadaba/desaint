@@ -14,7 +14,7 @@ try:
     from config.db_init import initialize_database
     initialize_database()
 except Exception as e:
-    print(f"DB Init Exception: {e}")
+    sys.stderr.write(f"DB Init Exception: {e}\n")
 
 from config.path_utils import normalize_wsgi_path
 from django.core.wsgi import get_wsgi_application

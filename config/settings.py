@@ -115,7 +115,7 @@ elif IS_VERCEL:
         from config.db_init import initialize_database
         initialize_database()
     except Exception as e:
-        print(f"Settings DB Init Notice: {e}")
+        sys.stderr.write(f"Settings DB Init Notice: {e}\n")
 
     DATABASES = {
         'default': {
